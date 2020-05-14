@@ -12,8 +12,6 @@ addSbtPlugin("com.twitter" % "scrooge-sbt-plugin" % "20.4.0")
 
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-publishMavenStyle := false
-
 bintrayOrganization := Some("guardian")
 bintrayRepository := "sbt-plugins"
 releasePublishArtifactsAction := PgpKeys.publishSigned.value

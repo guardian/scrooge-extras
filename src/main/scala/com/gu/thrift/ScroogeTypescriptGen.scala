@@ -13,7 +13,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
 
     // the tasks intended for most projects
     lazy val scroogeTypescriptCompile = taskKey[Unit]("Use the tsc command line to compile the generated files. This would spot any issue in the generated files")
-    lazy val scroogeTypescriptNPMPublish = taskKey[Unit]("Use the tsc command line to compile the generated files. This would spot any issue in the generated files")
+    lazy val scroogeTypescriptNPMPublish = taskKey[Unit]("This will publish your package to NPM with npm publish")
 
     // the tasks intended for the intrepid debuggers
     lazy val scroogeTypescriptGenPackageJson = taskKey[File]("Generate the package.json file")
