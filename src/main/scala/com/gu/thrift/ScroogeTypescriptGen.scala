@@ -36,11 +36,11 @@ object ScroogeTypescriptGen extends AutoPlugin {
 
   private def runCmd(cmd: String, dir: File, logger: Logger, expected: Int = 0, onError: String): Int = {
     logger.info(s"Running ${cmd}")
-    val npmReturnCode = Process(cmd, dir).!
-    if (npmReturnCode != expected) {
-      throw new Exception("Unable to install npm dependencies")
+    val returnCode = Process(cmd, dir).!
+    if (returnCode != expected) {
+      throw new Exception(s"Return code: $returnCode. $onError")
     }
-    npmReturnCode
+    returnCode
   }
 
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
