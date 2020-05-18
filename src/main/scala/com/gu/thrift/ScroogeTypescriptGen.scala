@@ -201,7 +201,8 @@ object ScroogeTypescriptGen extends AutoPlugin {
       runCmd("tsc", packageDir, logger = logger, onError = "There are compilation errors, check the output above")
     },
 
-    compile := ((compile in Compile) dependsOn scroogeTypescriptCompile).value,
+    Compile / compile := (Compile / compile).dependsOn(scroogeTypescriptCompile).value,
+    Test / compile := (Test / compile).dependsOn(scroogeTypescriptCompile).value,
 
     scroogeTypescriptNPMPublish := {
       scroogeTypescriptCompile.value
