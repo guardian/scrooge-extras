@@ -1,7 +1,7 @@
 package com.gu.thrift
 
-import com.twitter.scrooge.ScroogeSBT.autoImport.{scroogeThriftSourceFolder, scroogeUnpackDeps}
-import sbt.Keys.{baseDirectory, description, name, sLog, scmInfo, target, version, compile, resourceGenerators}
+import com.twitter.scrooge.ScroogeSBT.autoImport.{scroogeThriftDependencies, scroogeThriftSourceFolder, scroogeUnpackDeps}
+import sbt.Keys.{baseDirectory, compile, description, name, resourceGenerators, sLog, scmInfo, target, version, libraryDependencies}
 import sbt.io.IO
 import sbt._
 
@@ -45,12 +45,20 @@ object ScroogeTypescriptGen extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
     scroogeTypescriptDevDependencies := Map("typescript" -> "^3.8.3"),
-    scroogeTypescriptDependencies := Map(
-      "@types/node-int64" -> "^0.4.29",
-      "@types/thrift" -> "^0.10.9",
-      "node-int64" -> "^0.4.0",
-      "thrift" -> "^0.13.0"
-    ),
+    scroogeTypescriptDependencies := {
+      val dependencies = (Compile / scroogeThriftDependencies).value.flatMap { dependency =>
+        for {
+          nodeName <- scroogeTypescriptPackageMapping.value.get(dependency)
+          version <- libraryDependencies.value.find(_.name == dependency).map(module => s"^${module.revision}")
+        } yield nodeName -> version
+      }.toMap
+      Map(
+        "@types/node-int64" -> "^0.4.29",
+        "@types/thrift" -> "^0.10.9",
+        "node-int64" -> "^0.4.0",
+        "thrift" -> "^0.13.0"
+      ) ++ dependencies
+    },
     scroogeTypescriptPackageDirectory := target.value / "typescript",
     scroogeTypescriptThriftGenOptions := Seq("ts", "node", "es6"),
     scroogeTypescriptPackageMapping := Map(),

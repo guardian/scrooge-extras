@@ -50,7 +50,10 @@ In `build.sbt`
 ```sbt
 enablePlugins(ScroogeTypescriptGen)
 scroogeTypescriptNpmPackageName := "@guardian/mymodule",
-scroogeTypescriptPackageLicense := "Apache-2.0"
+scroogeTypescriptPackageLicense := "Apache-2.0",
+scroogeTypescriptPackageMapping := Map(
+  "scala-library-name" -> "@org/npm-module-name"
+)
 ```
 
 Then you're ready to generate and compile your models
@@ -71,6 +74,7 @@ Here are some settings you may want to use:
  
  - scroogeTypescriptNpmPackageName: The name of the package in `package.json`
  - scroogeTypescriptPackageLicense: The license of the package on NPM
+ - scroogeTypescriptPackageMapping: The mapping between scala libraries and their NPM equivalent
  - scroogeTypescriptDevDependencies: The dev dependencies to put in the `package.json`
  - scroogeTypescriptDependencies: The dependencies to put in the `package.json`
  - scroogeTypescriptDryRun: To be able to run everything without publishing to NPM
