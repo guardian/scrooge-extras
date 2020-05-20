@@ -20,6 +20,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
     lazy val scroogeTypescriptGenTypescript = taskKey[Seq[File]]("Run the thrift command line")
     lazy val scroogeTypescriptGenEpisodeFiles = taskKey[Seq[File]]("Generates the list of episode files from the dependencies resolved by scrooge")
     lazy val scroogeTypescriptGenNPMPackage = taskKey[Seq[File]]("Generate the npm package")
+    lazy val scroogeTypescriptGenTsConf = taskKey[File]("Generates the tsconfig.json")
 
     // the settings to customise the generation process
     lazy val scroogeTypescriptDevDependencies = settingKey[Map[String, String]]("The node devDependencies to include in the package.json")
@@ -89,6 +90,25 @@ object ScroogeTypescriptGen extends AutoPlugin {
       packageJson
     },
 
+    scroogeTypescriptGenTsConf := {
+      val content =
+        """
+          |{
+          |  "compilerOptions": {
+          |    "target": "es5",
+          |    "module": "commonjs",
+          |    "strict": true,
+          |    "esModuleInterop": true,
+          |    "forceConsistentCasingInFileNames": true
+          |  }
+          |}
+          |
+          |""".stripMargin
+      val tsConfig = scroogeTypescriptPackageDirectory.value / "tsconfig.json"
+      IO.write(tsConfig, content)
+      tsConfig
+    },
+
 
     scroogeTypescriptGenEpisodeFiles := {
       // If you're wondering what are episode files:
@@ -154,6 +174,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
     scroogeTypescriptGenNPMPackage := {
       val generatedSources = scroogeTypescriptGenTypescript.value
       val generatedPackageJson = scroogeTypescriptGenPackageJson.value
+      val generatedTsConfig = scroogeTypescriptGenTsConf.value
 
       val readmeFrom = baseDirectory.value / "README.md"
       val readmeTo = scroogeTypescriptPackageDirectory.value / "README.md"
@@ -182,7 +203,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
           |""".stripMargin
 
       sLog.value.info(message)
-      generatedSources ++ generatedReadme :+ generatedPackageJson
+      generatedSources ++ generatedReadme :+ generatedPackageJson :+ generatedTsConfig
     },
 
     Compile / resourceGenerators += scroogeTypescriptGenNPMPackage,
@@ -193,10 +214,6 @@ object ScroogeTypescriptGen extends AutoPlugin {
       val packageDir = scroogeTypescriptPackageDirectory.value
 
       runCmd("npm install", packageDir, logger = logger, onError = "Unable to install npm dependencies")
-
-      if (!(packageDir / "tsconfig.json").exists()) {
-        runCmd("tsc --init", packageDir, logger = logger, onError = "Unable to initialise the typescript compiler")
-      }
 
       runCmd("tsc", packageDir, logger = logger, onError = "There are compilation errors, check the output above")
     },
