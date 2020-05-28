@@ -205,6 +205,15 @@ class TypescriptGenerator(
   }
 
   def importsForStruct(structSource: StructLike): Seq[TsImport] = {
+    def listAllNamedTypes(ft: Seq[FieldType]): Seq[FieldType] = ft.flatMap {
+      case struct: StructType => Seq(struct)
+      case enum: EnumType => Seq(enum)
+      case listType: ListType => listAllNamedTypes(Seq(listType.eltType))
+      case setType: SetType => listAllNamedTypes(Seq(setType.eltType))
+      case mapType: MapType => listAllNamedTypes(Seq(mapType.keyType, mapType.valueType))
+      case _ => Nil
+    }
+
     def isExternalDependency(current: String, dependency: Option[String]): Boolean = {
       dependency.isDefined && !dependency.contains(current) && !dependency.exists(_.startsWith(current))
     }
@@ -228,8 +237,10 @@ class TypescriptGenerator(
       }
     }
 
+    val listOfAllNamedTypes = listAllNamedTypes(structSource.fields.map(_.fieldType))
+
     // maps the source file to the type to import
-    val importMappings = structSource.fields.map(_.fieldType).foldLeft(Seq.empty[(String, String)]) {
+    val importMappings = listOfAllNamedTypes.foldLeft(Seq.empty[(String, String)]) {
       case (agg, struct: StructType) => agg ++ Seq(
         importLocation(struct) -> companionName(struct.sid),
         importLocation(struct) -> typeName(struct.sid)
@@ -241,7 +252,7 @@ class TypescriptGenerator(
     importMappings
       .groupBy(_._1) // group by file
       .toSeq
-      .map { case (file, mapping) => TsImport(mapping.map(_._2), file) }
+      .map { case (file, mapping) => TsImport(mapping.map(_._2).distinct.sorted, file) }
       .sortBy(_.file)
   }
 
