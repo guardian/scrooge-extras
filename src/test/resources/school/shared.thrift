@@ -1,4 +1,5 @@
 #@namespace typescript _at_guardian.school.common
+#@namespace scala com.gu.thriftTest.school.common
 
 const i32 MAX_STUDENTS_PER_CLASS = 50;
 const map<string,i32> DISTRIBUTION = {"Maths": 45, "French": MAX_STUDENTS_PER_CLASS}

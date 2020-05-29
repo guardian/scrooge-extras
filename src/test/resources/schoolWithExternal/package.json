@@ -11,6 +11,6 @@
     "@types/node-int64": "^0.4.29",
     "@types/thrift": "^0.10.9",
     "node-int64": "^0.4.0",
-    "thrift": "^0.13.0"
+    "thrift": "^0.12.0"
   }
 }
