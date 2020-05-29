@@ -1,32 +1,40 @@
+import sbt.Defaults.sbtPluginExtra
 import sbtrelease.ReleaseStateTransformations._
 
-name := "sbt-scrooge-typescript"
-organization := "com.gu"
+name := "sbt-scrooge-extras"
 
-scalaVersion := "2.12.11"
+ThisBuild / organization := "com.gu"
+ThisBuild / scalaVersion := "2.12.11"
+ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-sbtPlugin := true
+val scroogeVersion = "20.4.1"
 
-// this plugin depends on scrooge
-addSbtPlugin("com.twitter" % "scrooge-sbt-plugin" % "20.4.0")
+lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
+  .settings(
+    sbtPlugin := true,
+    bintrayOrganization := Some("guardian"),
+    bintrayRepository := "sbt-plugins",
+    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
 
-licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
+    // this plugin depends on the scrooge plugin
+    libraryDependencies += sbtPluginExtra(
+      "com.twitter" % "scrooge-sbt-plugin" % scroogeVersion,
+      (pluginCrossBuild / sbtBinaryVersion).value,
+      (update / scalaBinaryVersion).value
+    ),
 
-bintrayOrganization := Some("guardian")
-bintrayRepository := "sbt-plugins"
-releasePublishArtifactsAction := PgpKeys.publishSigned.value
-
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  runClean,
-  runTest,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  publishArtifacts,
-  releaseStepTask(bintrayRelease),
-  setNextVersion,
-  commitNextVersion,
-  pushChanges
-)
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runClean,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      publishArtifacts,
+      releaseStepTask(bintrayRelease),
+      setNextVersion,
+      commitNextVersion,
+      pushChanges
+    )
+  )
