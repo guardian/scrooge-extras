@@ -1,0 +1,16 @@
+{
+  "name": "@guardian/school-with-external",
+  "version": "0.0.1",
+  "description": "A test package.json",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "@guardian/external":  "file:../external",
+    "@types/node-int64": "^0.4.29",
+    "@types/thrift": "^0.10.9",
+    "node-int64": "^0.4.0",
+    "thrift": "^0.13.0"
+  }
+}

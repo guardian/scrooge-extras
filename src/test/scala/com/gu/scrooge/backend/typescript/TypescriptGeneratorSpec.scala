@@ -13,28 +13,71 @@ class TypescriptGeneratorSpec extends AnyFlatSpec with Matchers {
 
   def copy(from: Path, to: Path): Unit = Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING)
 
-  val schoolResources: Path = findFile("school")
-  val output: Path = Paths.get("target","test")
-  val schoolPackage: Path = output.resolve("@guardian").resolve("school")
+  case class NpmProject(
+    resources: Path,
+    output: Path,
+    packageDirectory: Path
+  )
 
-  "A Typescript generator" should "generate typescript" in {
+  def forProject(name: String): NpmProject = NpmProject(
+    resources = findFile(name),
+    output = Paths.get("target","test"),
+    packageDirectory = Paths.get("target","test", "@guardian").resolve(name),
+  )
+
+  def compile(npmProject: NpmProject): Unit = {
+    copy(
+      npmProject.resources.resolve("package.json"),
+      npmProject.packageDirectory.resolve("package.json")
+    )
+    copy(
+      npmProject.resources.resolve("tsconfig.json"),
+      npmProject.packageDirectory.resolve("tsconfig.json")
+    )
+
+    val npmInstall = Process("npm install", npmProject.packageDirectory.toFile).!
+    npmInstall shouldEqual 0
+
+    val tsc = Process("tsc", npmProject.packageDirectory.toFile).!
+    tsc shouldEqual 0
+  }
+
+  def generate(npmProject: NpmProject, thriftFiles: Seq[String]): Unit = {
     val compiler = new Compiler()
-    compiler.destFolder = "target/test/"
-    compiler.thriftFiles += schoolResources.resolve("university.thrift").toString
-    compiler.thriftFiles += schoolResources.resolve("shared.thrift").toString
+    compiler.destFolder = npmProject.output.toString
+    thriftFiles.foreach(thriftFile => {
+      compiler.thriftFiles += npmProject.resources.resolve(thriftFile).toString
+    })
     compiler.language = "typescript"
     compiler.run()
   }
 
-  it should "compile" in {
-    copy(schoolResources.resolve("package.json"), schoolPackage.resolve("package.json"))
-    copy(schoolResources.resolve("tsconfig.json"), schoolPackage.resolve("tsconfig.json"))
+  val schoolProject: NpmProject = forProject("school")
+  val externalProject: NpmProject = forProject("external")
+  val schoolWithExternalProject: NpmProject = forProject("schoolWithExternal")
 
-    val npmInstall = Process("npm install", schoolPackage.toFile).!
-    npmInstall shouldEqual 0
+  "A Typescript generator" should "generate typescript for the school project" in {
+    generate(schoolProject, Seq("university.thrift", "shared.thrift"))
+  }
 
-    val tsc = Process("tsc", schoolPackage.toFile).!
-    tsc shouldEqual 0
+  it should "compile the typescript of the school project" in {
+    compile(schoolProject)
+  }
+
+  it should "generate typescript for the external project" in {
+    generate(externalProject, Seq("shared.thrift"))
+  }
+
+  it should "compile the typescript of the external project" in {
+    compile(externalProject)
+  }
+
+  it should "generate typescript for the school with external dependency project" in {
+    generate(schoolWithExternalProject, Seq("university.thrift"))
+  }
+
+  it should "compile the typescript of the school with external dependency project" in {
+    compile(schoolWithExternalProject)
   }
 
 }
