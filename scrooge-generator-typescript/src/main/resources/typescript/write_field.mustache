@@ -1,0 +1,33 @@
+{{#isSimple}}
+protocol.{{writingStatement}}({{variableName}});
+{{/isSimple}}
+{{#isNamed}}
+{{companionName}}.write(protocol, {{variableName}});
+{{/isNamed}}
+{{#isCollection}}
+protocol.{{startWritingStatement}}({{nestedType.thriftType}}, {{variableName}}.length);
+{{variableName}}.forEach({{nestedType.variableName}} => {
+    {{#nestedType}}
+    {{{writeField}}}
+    {{/nestedType}}
+});
+protocol.{{endWritingStatement}}();
+{{/isCollection}}
+{{#isMap}}
+protocol.writeMapBegin({{keyType.thriftType}}, {{valueType.thriftType}}, Thrift.objectLength({{variableName}}));
+{{#keyIsNumber}}
+Object.entries({{variableName}}).forEach(([{{keyType.variableName}}str, {{valueType.variableName}}]) => {
+const {{keyType.variableName}} = parseInt({{keyType.variableName}}str);
+{{/keyIsNumber}}
+{{^keyIsNumber}}
+Object.entries({{variableName}}).forEach(([{{keyType.variableName}}, {{valueType.variableName}}]) => {
+{{/keyIsNumber}}
+    {{#keyType}}
+    {{{writeField}}}
+    {{/keyType}}
+    {{#valueType}}
+    {{{writeField}}}
+    {{/valueType}}
+});
+protocol.writeMapEnd();
+{{/isMap}}

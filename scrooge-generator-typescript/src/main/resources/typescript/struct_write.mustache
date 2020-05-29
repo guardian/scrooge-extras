@@ -1,0 +1,15 @@
+static write(protocol: TProtocol, value0: {{typeName}}): void {
+    protocol.writeStructBegin('{{typeName}}');
+
+    {{#fields}}
+    if (value0.{{name}} !== null && value0.{{name}} !== undefined) {
+        const {{variableName}}: {{typescriptType}} = value0.{{name}};
+        protocol.writeFieldBegin('{{name}}', {{thriftType}}, {{index}});
+        {{{writeField}}}
+        protocol.writeFieldEnd();
+    }
+    {{/fields}}
+
+    protocol.writeFieldStop();
+    protocol.writeStructEnd();
+}

@@ -1,0 +1,17 @@
+{{>autogen}}
+
+import {Thrift, TProtocol} from 'thrift';
+import Int64 from 'node-int64';
+
+{{> imports}}
+
+export interface {{typeName}} {
+    {{#fields}}
+    {{name}}{{#isOptional}}?{{/isOptional}}: {{typescriptType}}
+    {{/fields}}
+}
+
+export class {{companionName}} {
+    {{> struct_read}}
+    {{> struct_write}}
+}
