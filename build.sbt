@@ -1,5 +1,6 @@
 import sbt.Defaults.sbtPluginExtra
 import sbtrelease.ReleaseStateTransformations._
+import com.twitter.scrooge.Compiler
 
 name := "sbt-scrooge-extras"
 
@@ -37,4 +38,22 @@ lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
       commitNextVersion,
       pushChanges
     )
+  )
+
+lazy val typescript = project.in(file("scrooge-generator-typescript"))
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.twitter" %% "scrooge-generator" % scroogeVersion,
+      "com.twitter" %% "scrooge-core" % scroogeVersion % "test",
+      "com.github.spullara.mustache.java" % "compiler" % "0.8.18",
+      "org.scalatest" %% "scalatest" % "3.1.1" % "test"
+    ),
+    Test / sourceGenerators += { () =>
+      val compiler = new Compiler()
+      compiler.destFolder = ((Compile / sourceManaged).value / "generated").getAbsolutePath
+      compiler.thriftFiles ++= ((Test / resourceDirectory).value / "school" ** "*.thrift").get().map(_.getAbsolutePath)
+      compiler.language = "scala"
+      compiler.run()
+      ((Compile / sourceManaged).value / "generated" ** "*.scala").get()
+    }
   )
