@@ -1,8 +1,8 @@
 # sbt-scrooge-typescript
 
-An SBT plugin to generate javascript and typescript definition from thrift files. 
+An SBT plugin to generate typescript definitions from thrift files. 
 
-It leverages Twitter's Scrooge plugin to resolve thrift dependencies, and calls the `thrift` command line.
+It leverages Twitter's Scrooge plugin to resolve thrift dependencies.
 
 ## Why
 
@@ -12,31 +12,26 @@ We're now using typescript more and more, so the intent of this plugin is to all
 
 ## How
 
-This plugin depends on the Scrooge SBT plugin. The dependency resolution and jar unpacking is left to the scrooge plugin. Once these steps are done, the sbt-scrooge-typescript plugin builds the `thrift` command line with the correct parameters in order to generate the typescript files with the correct imports.
+This plugin depends on the Scrooge SBT plugin. The dependency resolution and jar unpacking is left to the scrooge plugin, but the typescript generation is handled by this plugin.
 
-## Limits
+## Unsupported features (PRs  welcomed!)
 
-This plugin relies on the user having the `thrift` CLI installed on their machine. The `thrift` CLI does have a few issues:
+ - Thrift services. By lack of time, it's a matter of implementing it.
+ - Thrift's `typedef`s will work as expected, however they really should match Typescript's type aliasing feature. I was unable to declare type aliases as in the backend of the scrooge compiler that information is missing already. As far as I understand it's resolved in the frontend.
+ - Keyword protection isn't implemented as I haven't found any case where it was necessary yet.
 
- - Dependencies are modeled with "Episode" files in a process called "Episodic compilation". Aside from a pull request and reading the code this isn't documented.
- - It's harder to ensure the CLI version and the plugin version remain aligned as they are installed separately. It's not impossible to be faced with an issue in the future if the CLI introduce breaking changes.
- - Namespace is done at the file name level rather than the full path. So if you have one file called `shared.thrift` in one of your dependencies, and `src/thrift/someFolder/shared.thrift` in your project you will have a name collision. So we have to ensure no two files are named the same across our whole dependency tree.
- - The thrift CLI has a stricter set of reserved words that Scrooge doesn't have. For instance Scrooge is perfectly happy with naming a property `from`, but the `thrift` CLI will raise a compilation error.
+## Supported features
 
-## Going forward
-
-We should probably use a proper json library to generate the package.json, something like uPickle would be appropriate.
-
-I'd like to see this plugin generate the typescript source code directly rather than relying on the thrift command line. Scrooge has already got a few nice examples of code generation in scala using Mustache for templating. However upon investigation it turned out to be a larger piece of work than we could allocate for.
-
-So if anyone's keen on extending this plugin, PRs welcome! 
+ - Simple types are mapped to typescript's native types where possible.
+ - `struct`s are represented as `intereface`s
+ - `union`s are mapped to their corresponding union of types
+ - `enum`s are mapped to `enum`s
 
 ## Usage
 
 You need the following installed and configured:
  - tsc
  - npm
- - thrift
 
 _Assuming your project is already set up with scrooge to generate scala files_
 
