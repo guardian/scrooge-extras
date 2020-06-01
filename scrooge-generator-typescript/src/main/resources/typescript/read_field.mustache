@@ -13,7 +13,7 @@ if (listInfo{{depth}}.etype === {{nestedType.thriftType}}) {
         {{#nestedType}}
         {{{readField}}}
         {{/nestedType}}
-        value{{depth}}.push({{nestedType.variableName}});
+        {{variableName}}.push({{nestedType.variableName}});
     }
     protocol.{{endReadingStatement}}();
 } else {
@@ -23,7 +23,7 @@ if (listInfo{{depth}}.etype === {{nestedType.thriftType}}) {
 {{#isMap}}
 const mapInfo{{depth}} = protocol.readMapBegin();
 const mapSize{{depth}} = mapInfo{{depth}}.size ?? 0;
-const value{{depth}}: {{typescriptType}} = {};
+const {{variableName}}: {{typescriptType}} = {};
 if (mapInfo{{depth}}.ktype === {{keyType.thriftType}} && mapInfo{{depth}}.vtype === {{valueType.thriftType}}) {
     for (let i = 0; i < mapSize{{depth}}; i++) {
     {{#keyType}}
