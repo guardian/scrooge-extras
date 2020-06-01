@@ -2,7 +2,7 @@ import sbt.Defaults.sbtPluginExtra
 import sbtrelease.ReleaseStateTransformations._
 import com.twitter.scrooge.Compiler
 
-name := "sbt-scrooge-extras"
+name := "scrooge-extras"
 
 ThisBuild / organization := "com.gu"
 ThisBuild / scalaVersion := "2.12.11"
@@ -12,6 +12,21 @@ ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICEN
 publish / skip := true
 
 val scroogeVersion = "20.4.1"
+
+val standardReleaseSteps: Seq[ReleaseStep] = Seq(
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  publishArtifacts,
+  releaseStepTask(bintrayRelease),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
 
 lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
   .dependsOn(typescript)
@@ -28,26 +43,14 @@ lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
       (pluginCrossBuild / sbtBinaryVersion).value,
       (update / scalaBinaryVersion).value
     ),
-
-    releaseProcess := Seq[ReleaseStep](
-      checkSnapshotDependencies,
-      inquireVersions,
-      runClean,
-      runTest,
-      setReleaseVersion,
-      commitReleaseVersion,
-      tagRelease,
-      publishArtifacts,
-      releaseStepTask(bintrayRelease),
-      setNextVersion,
-      commitNextVersion,
-      pushChanges
-    )
+    releaseProcess := standardReleaseSteps
   )
 
 lazy val typescript = project.in(file("scrooge-generator-typescript"))
   .settings(
     name := "scrooge-generator-typescript",
+    bintrayOrganization := Some("guardian"),
+    bintrayRepository := "platforms",
     libraryDependencies ++= Seq(
       "com.twitter" %% "scrooge-generator" % scroogeVersion,
       "com.twitter" %% "scrooge-core" % scroogeVersion % "test",
@@ -61,6 +64,7 @@ lazy val typescript = project.in(file("scrooge-generator-typescript"))
       compiler.language = "scala"
       compiler.run()
       ((Compile / sourceManaged).value / "generated" ** "*.scala").get()
-    }
+    },
+    releaseProcess := standardReleaseSteps
   )
 
