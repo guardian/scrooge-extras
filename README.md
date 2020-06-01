@@ -1,4 +1,4 @@
-# sbt-scrooge-typescript
+# scrooge-extras
 
 An SBT plugin to generate typescript definitions from thrift files. 
 
