@@ -236,12 +236,6 @@ class TypescriptGenerator(
         namespace <- importedDocument.document.namespace(namespaceLanguage)
         namedTypePath = namespaceToPackagePath(namespace.fullName)
       } yield {
-        println(
-          s"""For ${structSource.sid.name}, attribute ${namedType.sid.name}:
-             |Package: $packagePath
-             |Struct: $structPath
-             |Attribute: $namedTypePath
-             |""".stripMargin)
         if (namedTypePath.startsWith(packagePath)) {
           val relativePath = structPath.relativize(namedTypePath)
           if (relativePath.startsWith(".") || relativePath.startsWith("..")) {
