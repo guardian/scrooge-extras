@@ -1,0 +1,31 @@
+static read(protocol: TProtocol): {{typeName}} {
+    protocol.readStructBegin();
+    const result: any = {};
+    while (true) {
+        const ret = protocol.readFieldBegin();
+        const ftype = ret.ftype;
+        const fid = ret.fid;
+        if (ftype === Thrift.Type.STOP) {
+            break;
+        }
+        switch (fid) {
+            {{#fields}}
+            case {{index}}:
+                if (ftype === {{thriftType}}) {
+                    {{{readField}}}
+                    result.{{name}} = value1;
+                    result.kind = "{{name}}";
+                } else {
+                    protocol.skip(ftype);
+                }
+                break;
+            {{/fields}}
+            default:
+                protocol.skip(ftype);
+        }
+        protocol.readFieldEnd();
+    }
+    protocol.readStructEnd();
+    // @ts-ignore
+    return result;
+}

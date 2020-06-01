@@ -1,9 +1,10 @@
 package com.gu.thrift
 
-import com.twitter.scrooge.ScroogeSBT.autoImport.{scroogeThriftDependencies, scroogeThriftSourceFolder, scroogeUnpackDeps}
-import sbt.Keys.{baseDirectory, compile, description, name, resourceGenerators, sLog, scmInfo, target, version, libraryDependencies}
+import com.twitter.scrooge.ScroogeSBT.autoImport.{scroogeThriftDependencies, scroogeThriftOutputFolder, scroogeDefaultJavaNamespace}
+import sbt.Keys.{baseDirectory, compile, description, libraryDependencies, name, resourceGenerators, sLog, scmInfo, target, version}
 import sbt.io.IO
 import sbt._
+import com.gu.scrooge.backend.typescript.NPMLibraries
 
 import scala.sys.process.Process
 
@@ -17,8 +18,6 @@ object ScroogeTypescriptGen extends AutoPlugin {
 
     // the tasks intended for the intrepid debuggers
     lazy val scroogeTypescriptGenPackageJson = taskKey[File]("Generate the package.json file")
-    lazy val scroogeTypescriptGenTypescript = taskKey[Seq[File]]("Run the thrift command line")
-    lazy val scroogeTypescriptGenEpisodeFiles = taskKey[Seq[File]]("Generates the list of episode files from the dependencies resolved by scrooge")
     lazy val scroogeTypescriptGenNPMPackage = taskKey[Seq[File]]("Generate the npm package")
     lazy val scroogeTypescriptGenTsConf = taskKey[File]("Generates the tsconfig.json")
 
@@ -27,7 +26,6 @@ object ScroogeTypescriptGen extends AutoPlugin {
     lazy val scroogeTypescriptDependencies = settingKey[Map[String, String]]("The node dependencies to include in the package.json")
     lazy val scroogeTypescriptPackageDirectory = settingKey[File]("The directory where the node package will be generated")
     lazy val scroogeTypescriptPackageLicense = settingKey[String]("The license used to publish the package")
-    lazy val scroogeTypescriptThriftGenOptions = settingKey[Seq[String]]("The list of generation options passed to the thrift cmd line")
     lazy val scroogeTypescriptPackageMapping = settingKey[Map[String, String]]("The mapping between the thrift jar dependency name to the npm module name")
     lazy val scroogeTypescriptNpmPackageName = settingKey[String]("The name of the package in the package.json")
     lazy val scroogeTypescriptDryRun = settingKey[Boolean]("Whether to try all the step without actually publishing the library on NPM")
@@ -45,7 +43,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
   }
 
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
-    scroogeTypescriptDevDependencies := Map("typescript" -> "^3.8.3"),
+    scroogeTypescriptDevDependencies := NPMLibraries.devDependencies,
     scroogeTypescriptDependencies := {
       val dependencies = (Compile / scroogeThriftDependencies).value.flatMap { dependency =>
         for {
@@ -53,19 +51,12 @@ object ScroogeTypescriptGen extends AutoPlugin {
           version <- libraryDependencies.value.find(_.name == dependency).map(module => s"^${module.revision}")
         } yield nodeName -> version
       }.toMap
-      Map(
-        "@types/node-int64" -> "^0.4.29",
-        "@types/thrift" -> "^0.10.9",
-        "node-int64" -> "^0.4.0",
-        "thrift" -> "^0.13.0"
-      ) ++ dependencies
+      NPMLibraries.dependencies ++ dependencies
     },
-    scroogeTypescriptPackageDirectory := target.value / "typescript",
-    scroogeTypescriptThriftGenOptions := Seq("ts", "node", "es6"),
+    scroogeTypescriptPackageDirectory := (Compile / scroogeThriftOutputFolder).value,
     scroogeTypescriptPackageMapping := Map(),
     scroogeTypescriptNpmPackageName := name.value,
     scroogeTypescriptDryRun := false,
-
 
     scroogeTypescriptGenPackageJson := {
       def asHash(map: Map[String, String]): String = map.map {case (k, v) => s""""$k": "$v"""" }.mkString("{\n",",\n","\n}")
@@ -110,69 +101,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
     },
 
 
-    scroogeTypescriptGenEpisodeFiles := {
-      // If you're wondering what are episode files:
-      // They are flat files consumed by the thrift command line, each line represents a potential javascript dependency
-      // On each line there are two parts delimited by `:`
-      // On the left of the `:` is the name of the thrift file
-      // On the right of the `:` is the path to the npm package
-      // This isn't well documented, I had to read the C source files to understand
-      (Compile / scroogeUnpackDeps).value.map { dependency =>
-        sLog.value.info(s"Generating the episode file for ${dependency.name}")
-        val npmModuleName = scroogeTypescriptPackageMapping.value.getOrElse(dependency.name, dependency.name)
-
-        val episodeFileContent = (dependency ** "*.thrift").get().map { thriftFile =>
-          val cleanedName = thriftFile.name.replaceAll(""".thrift$""", "")
-          // The thrift command line only allow npm dependencies without prefix.
-          // Using the `..` is a way to work around their limitation so npmModuleName can be prefixed with @guardian/...
-          s"${cleanedName}_types:../$npmModuleName/${cleanedName}_types"
-        }.mkString("\n")
-
-        val episodeDirectory = target.value / "episodes" / npmModuleName
-        val episodeFile = episodeDirectory / "thrift.js.episode"
-        IO.write(episodeFile, episodeFileContent)
-        episodeDirectory
-      }
-    },
-
-
-    scroogeTypescriptGenTypescript := {
-      val log = sLog.value
-
-      val outputDirOption = s"-out ${scroogeTypescriptPackageDirectory.value}"
-      IO.createDirectory(scroogeTypescriptPackageDirectory.value)
-
-      val episodeFileOption = Some(scroogeTypescriptGenEpisodeFiles.value)
-        .filter(_.nonEmpty)
-        .map(_.mkString("imports=", ":", ""))
-        .toSeq
-
-      val generationOptions = (scroogeTypescriptThriftGenOptions.value ++ episodeFileOption ).mkString("--gen js:", ",", "")
-
-      val importDirectoriesOptions = (Compile / scroogeUnpackDeps).value.map { dependency =>
-        s"-I ${dependency.getPath}"
-      }.mkString(" ")
-
-      val appsRenderingFiles = (Compile / scroogeThriftSourceFolder).value ** "*.thrift"
-      val returnCodes = appsRenderingFiles.get().map(thriftFile => {
-        val cmdline = s"thrift ${generationOptions} ${importDirectoriesOptions} ${outputDirOption} ${thriftFile.getPath}"
-        log.info(s"Generating definitions for ${thriftFile.getName}")
-        log.info(cmdline)
-        Process(cmdline, baseDirectory.value).!
-      })
-
-      if (returnCodes.sum != 0) {
-        throw new Exception("Error during thrift compilation, check the output above")
-      }
-
-      val definitions = scroogeTypescriptPackageDirectory.value * "*.d.ts"
-      val js = scroogeTypescriptPackageDirectory.value * "*.js"
-      (definitions +++ js).get
-    },
-
-
     scroogeTypescriptGenNPMPackage := {
-      val generatedSources = scroogeTypescriptGenTypescript.value
       val generatedPackageJson = scroogeTypescriptGenPackageJson.value
       val generatedTsConfig = scroogeTypescriptGenTsConf.value
 
@@ -195,7 +124,6 @@ object ScroogeTypescriptGen extends AutoPlugin {
           |To check it compiles correctly
           |cd ${scroogeTypescriptPackageDirectory.value}
           |npm install
-          |tsc --init
           |tsc
           |
           |To publish the package:
@@ -203,7 +131,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
           |""".stripMargin
 
       sLog.value.info(message)
-      generatedSources ++ generatedReadme :+ generatedPackageJson :+ generatedTsConfig
+      generatedReadme :+ generatedPackageJson :+ generatedTsConfig
     },
 
     Compile / resourceGenerators += scroogeTypescriptGenNPMPackage,

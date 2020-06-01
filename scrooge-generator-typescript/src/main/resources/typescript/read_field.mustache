@@ -1,0 +1,41 @@
+{{#isSimple}}
+const {{variableName}} = protocol.{{readingStatement}}();
+{{/isSimple}}
+{{#isNamed}}
+const {{variableName}} = {{companionName}}.read(protocol);
+{{/isNamed}}
+{{#isCollection}}
+const listInfo{{depth}} = protocol.{{startReadingStatement}}();
+const listSize{{depth}} = listInfo{{depth}}.size ?? 0;
+const {{variableName}}: {{typescriptType}} = [];
+if (listInfo{{depth}}.etype === {{nestedType.thriftType}}) {
+    for (let i = 0; i < listSize{{depth}}; i++) {
+        {{#nestedType}}
+        {{{readField}}}
+        {{/nestedType}}
+        {{variableName}}.push({{nestedType.variableName}});
+    }
+    protocol.{{endReadingStatement}}();
+} else {
+    protocol.skip(ftype);
+}
+{{/isCollection}}
+{{#isMap}}
+const mapInfo{{depth}} = protocol.readMapBegin();
+const mapSize{{depth}} = mapInfo{{depth}}.size ?? 0;
+const {{variableName}}: {{typescriptType}} = {};
+if (mapInfo{{depth}}.ktype === {{keyType.thriftType}} && mapInfo{{depth}}.vtype === {{valueType.thriftType}}) {
+    for (let i = 0; i < mapSize{{depth}}; i++) {
+    {{#keyType}}
+    {{{readField}}}
+    {{/keyType}}
+    {{#valueType}}
+    {{{readField}}}
+    {{/valueType}}
+    {{variableName}}[{{keyType.variableName}}] = {{valueType.variableName}};
+    }
+    protocol.readMapEnd();
+} else {
+    protocol.skip(ftype);
+}
+{{/isMap}}
