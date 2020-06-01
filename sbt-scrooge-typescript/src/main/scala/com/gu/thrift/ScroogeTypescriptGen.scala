@@ -1,9 +1,10 @@
 package com.gu.thrift
 
-import com.twitter.scrooge.ScroogeSBT.autoImport.{scroogeThriftDependencies, scroogeThriftOutputFolder}
+import com.twitter.scrooge.ScroogeSBT.autoImport.{scroogeThriftDependencies, scroogeThriftOutputFolder, scroogeDefaultJavaNamespace}
 import sbt.Keys.{baseDirectory, compile, description, libraryDependencies, name, resourceGenerators, sLog, scmInfo, target, version}
 import sbt.io.IO
 import sbt._
+import com.gu.scrooge.backend.typescript.NPMLibraries
 
 import scala.sys.process.Process
 
@@ -42,7 +43,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
   }
 
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
-    scroogeTypescriptDevDependencies := Map("typescript" -> "^3.8.3"),
+    scroogeTypescriptDevDependencies := NPMLibraries.devDependencies,
     scroogeTypescriptDependencies := {
       val dependencies = (Compile / scroogeThriftDependencies).value.flatMap { dependency =>
         for {
@@ -50,18 +51,12 @@ object ScroogeTypescriptGen extends AutoPlugin {
           version <- libraryDependencies.value.find(_.name == dependency).map(module => s"^${module.revision}")
         } yield nodeName -> version
       }.toMap
-      Map(
-        "@types/node-int64" -> "^0.4.29",
-        "@types/thrift" -> "^0.10.9",
-        "node-int64" -> "^0.4.0",
-        "thrift" -> "^0.12.0"
-      ) ++ dependencies
+      NPMLibraries.dependencies ++ dependencies
     },
     scroogeTypescriptPackageDirectory := (Compile / scroogeThriftOutputFolder).value,
     scroogeTypescriptPackageMapping := Map(),
     scroogeTypescriptNpmPackageName := name.value,
     scroogeTypescriptDryRun := false,
-
 
     scroogeTypescriptGenPackageJson := {
       def asHash(map: Map[String, String]): String = map.map {case (k, v) => s""""$k": "$v"""" }.mkString("{\n",",\n","\n}")

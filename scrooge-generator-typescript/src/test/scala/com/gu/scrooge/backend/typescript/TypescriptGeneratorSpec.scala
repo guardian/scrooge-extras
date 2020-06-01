@@ -24,16 +24,24 @@ class TypescriptGeneratorSpec extends AnyFlatSpec with Matchers {
   }
 
   case class NpmProject(
+    packageName: String,
     resources: Path,
     output: Path,
     packageDirectory: Path
   )
 
-  def forProject(name: String): NpmProject = NpmProject(
-    resources = findFile(name),
-    output = Paths.get("target","test"),
-    packageDirectory = Paths.get("target","test", "@guardian").resolve(name),
-  )
+  def forProject(packageName: String, resourceFolder: String): NpmProject = {
+    val packageElems = packageName.split('/').toList
+    val packagePath = Paths.get(packageElems.head, packageElems.tail: _*)
+    val output = Paths.get("target","test")
+
+    NpmProject(
+      packageName = packageName,
+      resources = findFile(resourceFolder),
+      output = output,
+      packageDirectory = output.resolve(packagePath),
+    )
+  }
 
   def compile(npmProject: NpmProject): Unit = {
     copy(
@@ -58,6 +66,7 @@ class TypescriptGeneratorSpec extends AnyFlatSpec with Matchers {
     thriftFiles.foreach(thriftFile => {
       compiler.thriftFiles += npmProject.resources.resolve(thriftFile).toString
     })
+    compiler.defaultNamespace = npmProject.packageName
     compiler.language = "typescript"
     compiler.run()
   }
@@ -76,10 +85,11 @@ class TypescriptGeneratorSpec extends AnyFlatSpec with Matchers {
     read(protocol)
   }
 
-  val schoolProject: NpmProject = forProject("school")
-  val externalProject: NpmProject = forProject("external")
-  val schoolWithExternalProject: NpmProject = forProject("schoolWithExternal")
-  val decodeEncodeProject: NpmProject = forProject("decode-encode")
+  val schoolProject: NpmProject = forProject("@guardian/school", "school")
+  val externalProject: NpmProject = forProject("@guardian/external", "external")
+  val schoolWithExternalProject: NpmProject = forProject("@guardian/schoolWithExternal", "schoolWithExternal")
+  val decodeEncodeProject: NpmProject = forProject("@guardian/decode-encode", "decode-encode")
+  val entityProject: NpmProject = forProject("@guardian/content-entity-model", "entity")
 
   val school: School = {
     val harry: Student = Student(FullName("Harry Potter"), 10, Set(0), Some(Human))
@@ -104,6 +114,23 @@ class TypescriptGeneratorSpec extends AnyFlatSpec with Matchers {
 
   it should "compile the typescript of the school project" in {
     compile(schoolProject)
+  }
+
+  it should "generate typescript for the entity project" in {
+    generate(entityProject, Seq(
+      "entity.thrift",
+      "shared.thrift",
+      "entities/film.thrift",
+      "entities/game.thrift",
+      "entities/organisation.thrift",
+      "entities/person.thrift",
+      "entities/place.thrift",
+      "entities/restaurant.thrift",
+    ))
+  }
+
+  it should "compile the typescript of the entity project" in {
+    compile(entityProject)
   }
 
   it should "generate typescript for the external project" in {

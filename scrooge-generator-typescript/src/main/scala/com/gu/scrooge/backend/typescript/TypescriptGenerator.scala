@@ -1,9 +1,12 @@
 package com.gu.scrooge.backend.typescript
 
 import java.io.{File, FileWriter}
+import java.nio.file.{Path, Paths}
+
 import com.twitter.scrooge.backend.{Generator, GeneratorFactory, ServiceOption}
 import com.twitter.scrooge.frontend.{ParseException, ResolvedDocument, ScroogeInternalException}
 import com.twitter.scrooge.ast._
+
 import scala.collection.mutable
 
 class TypescriptGeneratorFactory extends GeneratorFactory {
@@ -51,6 +54,10 @@ class TypescriptGenerator(
   def filename(sid: SimpleID): String = sid.toCamelCase.name
   def typeName(sid: SimpleID): String = sid.toTitleCase.name
   def companionName(sid: SimpleID): String = s"${sid.toTitleCase.name}Serde"
+  def packageNameFromNamespace(name: String): String =
+    name.replaceAllLiterally("_at_", "@")
+      .replace('.', File.separatorChar)
+      .replace('_', '-')
 
   def thriftType(t: FunctionType): String = t match {
     case Void => "Thrift.Type.VOID"
@@ -108,7 +115,7 @@ class TypescriptGenerator(
   }
 
   def namespacedFolder(destFolder: File, namespace: String, dryRun: Boolean): File = {
-    val cleanedNamespace = namespace.replaceAllLiterally("_at_", "@").replace('.', File.separatorChar)
+    val cleanedNamespace = packageNameFromNamespace(namespace)
     val file = new File(destFolder, cleanedNamespace)
     if (!dryRun) file.mkdirs()
     file
@@ -205,6 +212,11 @@ class TypescriptGenerator(
   }
 
   def importsForStruct(structSource: StructLike): Seq[TsImport] = {
+    def namespaceToPackagePath(namespace: String): Path = {
+      val namespaceElements = packageNameFromNamespace(namespace).split('/').toList
+      Paths.get(namespaceElements.head, namespaceElements.tail: _*)
+    }
+
     def listAllNamedTypes(ft: Seq[FieldType]): Seq[FieldType] = ft.flatMap {
       case struct: StructType => Seq(struct)
       case enum: EnumType => Seq(enum)
@@ -214,27 +226,34 @@ class TypescriptGenerator(
       case _ => Nil
     }
 
-    def isExternalDependency(current: String, dependency: Option[String]): Boolean = {
-      dependency.isDefined && !dependency.contains(current) && !dependency.exists(_.startsWith(current))
-    }
     def importLocation(namedType: NamedType): String = {
-      val namespaceOfTheNamedType = for {
+      val packagePath: Path = namespaceToPackagePath(defaultNamespace)
+      val structPath: Path = namespaceToPackagePath(namespace.fullName)
+
+      val location = for {
         prefix <- namedType.scopePrefix
         importedDocument <- resolvedDoc.resolver.includeMap.get(prefix.fullName)
         namespace <- importedDocument.document.namespace(namespaceLanguage)
-      } yield namespace.fullName
-
-      if (isExternalDependency(namespace.fullName, namespaceOfTheNamedType)) {
-        val prefix = namespaceOfTheNamedType.get
-          .replaceAllLiterally("_at_", "@")
-          .replace('.', '/')
-        s"$prefix/${namedType.sid.toCamelCase.name}"
-      } else if (namespaceOfTheNamedType.exists(_.startsWith(namespace.fullName))) {
-        val relativePath = namespaceOfTheNamedType.get.drop(namespace.fullName.length + 1)
-        s"./$relativePath/${namedType.sid.toCamelCase.name}"
-      } else {
-        s"./${namedType.sid.toCamelCase.name}"
+        namedTypePath = namespaceToPackagePath(namespace.fullName)
+      } yield {
+        println(
+          s"""For ${structSource.sid.name}, attribute ${namedType.sid.name}:
+             |Package: $packagePath
+             |Struct: $structPath
+             |Attribute: $namedTypePath
+             |""".stripMargin)
+        if (namedTypePath.startsWith(packagePath)) {
+          val relativePath = structPath.relativize(namedTypePath)
+          if (relativePath.startsWith(".") || relativePath.startsWith("..")) {
+            s"${relativePath.resolve(namedType.sid.toCamelCase.name)}"
+          } else {
+            s"./${relativePath.resolve(namedType.sid.toCamelCase.name)}"
+          }
+        } else {
+          s"${namedTypePath}/${namedType.sid.toCamelCase.name}"
+        }
       }
+      location.getOrElse(s"./${namedType.sid.toCamelCase.name}")
     }
 
     val listOfAllNamedTypes = listAllNamedTypes(structSource.fields.map(_.fieldType))
