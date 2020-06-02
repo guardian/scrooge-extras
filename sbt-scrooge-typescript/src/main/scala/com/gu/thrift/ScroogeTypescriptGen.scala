@@ -1,7 +1,7 @@
 package com.gu.thrift
 
-import com.twitter.scrooge.ScroogeSBT.autoImport.{scroogeThriftDependencies, scroogeThriftOutputFolder, scroogeDefaultJavaNamespace}
-import sbt.Keys.{baseDirectory, compile, description, libraryDependencies, name, resourceGenerators, sLog, scmInfo, target, version}
+import com.twitter.scrooge.ScroogeSBT.autoImport.{scroogeGen, scroogeThriftDependencies, scroogeThriftOutputFolder}
+import sbt.Keys.{baseDirectory, commands, compile, description, libraryDependencies, name, resourceGenerators, sLog, scmInfo, version}
 import sbt.io.IO
 import sbt._
 import com.gu.scrooge.backend.typescript.NPMLibraries
@@ -13,7 +13,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
   object autoImport {
 
     // the tasks intended for most projects
-    lazy val scroogeTypescriptCompile = taskKey[Unit]("Use the tsc command line to compile the generated files. This would spot any issue in the generated files")
+    lazy val scroogeTypescriptCompile = taskKey[Seq[File]]("Use the tsc command line to compile the generated files. This would spot any issue in the generated files")
     lazy val scroogeTypescriptNPMPublish = taskKey[Unit]("This will publish your package to NPM with npm publish")
 
     // the tasks intended for the intrepid debuggers
@@ -53,7 +53,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
       }.toMap
       NPMLibraries.dependencies ++ dependencies
     },
-    scroogeTypescriptPackageDirectory := (Compile / scroogeThriftOutputFolder).value,
+    scroogeTypescriptPackageDirectory := (Compile / scroogeThriftOutputFolder).value / scroogeTypescriptNpmPackageName.value,
     scroogeTypescriptPackageMapping := Map(),
     scroogeTypescriptNpmPackageName := name.value,
     scroogeTypescriptDryRun := false,
@@ -134,17 +134,22 @@ object ScroogeTypescriptGen extends AutoPlugin {
       generatedReadme :+ generatedPackageJson :+ generatedTsConfig
     },
 
-    Compile / resourceGenerators += scroogeTypescriptGenNPMPackage,
-
     scroogeTypescriptCompile := {
-      scroogeTypescriptGenNPMPackage.value
+      val generatedTypescriptFiles = (Compile / scroogeGen).value
+      val generatedFiles = scroogeTypescriptGenNPMPackage.value
       val logger: Logger = sLog.value
       val packageDir = scroogeTypescriptPackageDirectory.value
 
       runCmd("npm install", packageDir, logger = logger, onError = "Unable to install npm dependencies")
 
       runCmd("tsc", packageDir, logger = logger, onError = "There are compilation errors, check the output above")
+
+      val compiledFiles = (packageDir ** "*.js").get()
+
+      generatedTypescriptFiles ++ generatedFiles ++ compiledFiles
     },
+
+    Compile / resourceGenerators += scroogeTypescriptCompile,
 
     Compile / compile := (Compile / compile).dependsOn(scroogeTypescriptCompile).value,
     Test / compile := (Test / compile).dependsOn(scroogeTypescriptCompile).value,
@@ -162,7 +167,22 @@ object ScroogeTypescriptGen extends AutoPlugin {
           onError = "Unable to publish package to NPM, check the output above"
         )
       }
+    },
+
+    commands += Command.single("releaseNpm"){ (currentState, versionString) =>
+      def sequentially(currentState: State)(actions: Seq[(Extracted, State) => State]): State = {
+        actions.foldLeft(currentState){
+          case (state, action) => action(Project.extract(state), state)
+        }
+      }
+
+      val currentVersion = Project.extract(currentState).get(version)
+
+      sequentially(currentState)(Seq(
+        (extracted, state) => extracted.appendWithSession(Seq(version := versionString), state),
+        (extracted, state) => extracted.runTask(scroogeTypescriptNPMPublish, state)._1,
+        (extracted, state) => extracted.appendWithSession(Seq(version := currentVersion), state)
+      ))
     }
   )
-
 }
