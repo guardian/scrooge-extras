@@ -150,8 +150,10 @@ _Assuming your project is already set up with scrooge to generate scala files_
 
 In `project/plugins.sbt`
 ```sbt
-addSbtPlugin("com.twitter" % "scrooge-sbt-plugin" % "20.4.0")
-addSbtPlugin("com.gu" % "sbt-scrooge-typescript" % "1.0.0") // latest version here
+addSbtPlugin("com.twitter" % "scrooge-sbt-plugin" % "20.4.1")
+
+resolvers += "Guardian Platform Bintray" at "https://dl.bintray.com/guardian/platforms"
+addSbtPlugin("com.gu" % "sbt-scrooge-typescript" % "<latest_version>")
 ```
 
 In `build.sbt`
