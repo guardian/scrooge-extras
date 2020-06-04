@@ -111,6 +111,7 @@ class TypescriptGenerator(
     case MapRHS(elems) => elems
       .map { case (k, v) => s"${constValue(k)}: ${constValue(v)}"}
       .mkString("{", ",", "}")
+    case EnumRHS(enum, value) => s"${enum.sid.toTitleCase.name}.${value.sid.toUpperCase.name}"
     case _ => throw new ScroogeInternalException(s"Unsupported constant type: $rhs")
   }
 

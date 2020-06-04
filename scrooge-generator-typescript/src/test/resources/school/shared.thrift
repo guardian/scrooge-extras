@@ -11,6 +11,7 @@ struct Student {
   2: required Age age
   3: optional set<i32> grades = [0, 4]
   5: optional Type type
+  6: required Type secondaryType = Type.ROBOT
 }
 
 enum Type {
