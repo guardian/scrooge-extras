@@ -17,6 +17,7 @@ This plugin depends on the Scrooge SBT plugin. The dependency resolution and jar
 ## Unsupported features (PRs  welcomed!)
 
  - Thrift services. By lack of time, it's a matter of implementing it.
+ - Thrift annotations. Similarly by lack of time.
  - Thrift's `typedef`s will work as expected, however they really should match Typescript's type aliasing feature. I was unable to declare type aliases as in the backend of the scrooge compiler that information is missing.
  - Keyword protection isn't implemented as I haven't found any case where it was necessary yet.
 
