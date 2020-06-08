@@ -90,10 +90,10 @@ object ScroogeTypescriptGen extends AutoPlugin {
           |    "module": "commonjs",
           |    "strict": true,
           |    "esModuleInterop": true,
-          |    "forceConsistentCasingInFileNames": true
+          |    "forceConsistentCasingInFileNames": true,
+          |    "declaration": true
           |  }
           |}
-          |
           |""".stripMargin
       val tsConfig = scroogeTypescriptPackageDirectory.value / "tsconfig.json"
       IO.write(tsConfig, content)
@@ -157,9 +157,13 @@ object ScroogeTypescriptGen extends AutoPlugin {
     scroogeTypescriptNPMPublish := {
       scroogeTypescriptCompile.value
 
+      val generatedTypescriptFiles = (scroogeTypescriptPackageDirectory.value ** ("*.ts" -- "*.d.ts")).get()
+
       if (scroogeTypescriptDryRun.value) {
         sLog.value.info("Would have run npm publish --access public but we're in dry-mode")
+        sLog.value.info(s"Would also have deleted these files before publishing: ${generatedTypescriptFiles.map(_.name)}")
       } else {
+        generatedTypescriptFiles.foreach(_.delete)
         runCmd(
           cmd = "npm publish --access public",
           dir = scroogeTypescriptPackageDirectory.value,
