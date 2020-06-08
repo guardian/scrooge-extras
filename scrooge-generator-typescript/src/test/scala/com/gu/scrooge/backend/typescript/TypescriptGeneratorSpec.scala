@@ -14,6 +14,8 @@ import org.apache.thrift.transport.TMemoryBuffer
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import scala.io.Source
+
 class TypescriptGeneratorSpec extends AnyFlatSpec with Matchers {
 
   def findFile(name: String): Path = Paths.get(this.getClass.getClassLoader.getResource(name).toURI)
@@ -90,6 +92,7 @@ class TypescriptGeneratorSpec extends AnyFlatSpec with Matchers {
   val schoolWithExternalProject: NpmProject = forProject("@guardian/schoolWithExternal", "schoolWithExternal")
   val decodeEncodeProject: NpmProject = forProject("@guardian/decode-encode", "decode-encode")
   val entityProject: NpmProject = forProject("@guardian/content-entity-model", "entity")
+  val noInt64Project: NpmProject = forProject("@guardian/no-int64", "no-int64")
 
   val school: School = {
     val harry: Student = Student(FullName("Harry Potter"), 10, Set(0), Some(Human))
@@ -164,6 +167,16 @@ class TypescriptGeneratorSpec extends AnyFlatSpec with Matchers {
 
   it should "compile the typescript of the school with external dependency project" in {
     compile(schoolWithExternalProject)
+  }
+
+  it should "generate and compile typescript without the int64 import if there's no int64 used in the file" in {
+    generate(noInt64Project, Seq("noint64.thrift"))
+    compile(noInt64Project)
+    val generatedFile = noInt64Project.packageDirectory.resolve("noInt64.ts").toFile
+
+    generatedFile.exists shouldBe true
+    val source = Source.fromFile(generatedFile)
+    source.mkString.contains("import Int64 from 'node-int64';") shouldBe false
   }
 
 }

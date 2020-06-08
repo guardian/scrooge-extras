@@ -6,6 +6,7 @@ case class TsStruct(
   fields: Seq[TsField],
   imports: Seq[TsImport],
   defaults: Seq[TsDefaultValue],
+  needsInt64Import: Boolean
 )
 
 trait TsField {

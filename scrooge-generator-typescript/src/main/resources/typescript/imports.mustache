@@ -1,3 +1,8 @@
+import {Thrift, TProtocol} from 'thrift';
+{{#needsInt64Import}}
+import Int64 from 'node-int64';
+{{/needsInt64Import}}
+
 {{#imports}}
 import {
 {{#types}}

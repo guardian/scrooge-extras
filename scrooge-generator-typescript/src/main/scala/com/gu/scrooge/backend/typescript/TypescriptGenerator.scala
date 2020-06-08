@@ -212,6 +212,16 @@ class TypescriptGenerator(
     }
   }
 
+  def needsInt64Import(ft: Seq[FieldType]): Boolean = ft.exists {
+    case TI64 => true
+    case struct: StructType => needsInt64Import(struct.struct.fields.map(_.fieldType))
+    case _: EnumType => false
+    case listType: ListType => needsInt64Import(Seq(listType.eltType))
+    case setType: SetType => needsInt64Import(Seq(setType.eltType))
+    case mapType: MapType => needsInt64Import(Seq(mapType.keyType, mapType.valueType))
+    case _ => false
+  }
+
   def importsForStruct(structSource: StructLike): Seq[TsImport] = {
     def namespaceToPackagePath(namespace: String): Path = {
       val namespaceElements = packageNameFromNamespace(namespace).split('/').toList
@@ -309,6 +319,7 @@ class TypescriptGenerator(
             isLastField = field == lastField
           )),
           imports = importsForStruct(struct),
+          needsInt64Import = needsInt64Import(struct.fields.map(_.fieldType)),
           defaults = struct.fields
             .map(f => f.sid -> f.default )
             .collect { case (sid, Some(default)) => TsDefaultValue(sid.toCamelCase.name, constValue(default)) }
