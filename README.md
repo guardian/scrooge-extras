@@ -199,7 +199,7 @@ Here are some settings you may want to use:
 
 With each `struct` or `union` in the thrift definitions, two types are generated.
 
-For instance, for the `struct` `School`, you'll have a generated `interface` called `School`, and a generated `SchoolSerde` class that will be able to serialise and deserialise objects of type `School`. Hence the suffix "Serde" for SERialisation-DEserialisation.
+For instance, for the `struct` `School`, you'll have a generated `interface` called `School`, and a generated `SchoolSerde` class that will be able to serialise and deserialise objects of type `School`. Hence the suffix "Serde" for SERialization-DEserialization.
 
 ```typescript
 const protocol: TProtocol = ...;
