@@ -214,8 +214,6 @@ class TypescriptGenerator(
 
   def needsInt64Import(ft: Seq[FieldType]): Boolean = ft.exists {
     case TI64 => true
-    case struct: StructType => needsInt64Import(struct.struct.fields.map(_.fieldType))
-    case _: EnumType => false
     case listType: ListType => needsInt64Import(Seq(listType.eltType))
     case setType: SetType => needsInt64Import(Seq(setType.eltType))
     case mapType: MapType => needsInt64Import(Seq(mapType.keyType, mapType.valueType))
