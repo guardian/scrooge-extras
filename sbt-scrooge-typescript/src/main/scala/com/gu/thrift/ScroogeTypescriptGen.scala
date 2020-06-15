@@ -91,7 +91,10 @@ object ScroogeTypescriptGen extends AutoPlugin {
           |    "strict": true,
           |    "esModuleInterop": true,
           |    "forceConsistentCasingInFileNames": true,
-          |    "declaration": true
+          |    "declaration": true,
+          |    // this is to disable searching in ../node_modules as it can trigger compilation errors unrelated to this
+          |    // self contained project
+          |    "typeRoots": ["./node_modules/@types"],
           |  }
           |}
           |""".stripMargin
