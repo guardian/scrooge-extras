@@ -58,7 +58,7 @@ class TypescriptGeneratorSpec extends AnyFlatSpec with Matchers {
     val npmInstall = Process("npm install", npmProject.packageDirectory.toFile).!
     npmInstall shouldEqual 0
 
-    val tsc = Process("tsc", npmProject.packageDirectory.toFile).!
+    val tsc = Process("./node_modules/.bin/tsc", npmProject.packageDirectory.toFile).!
     tsc shouldEqual 0
   }
 
