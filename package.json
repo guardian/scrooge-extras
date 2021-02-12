@@ -1,0 +1,22 @@
+{
+  "name": "scrooge-extras",
+  "version": "1.2.6",
+  "description": "An SBT plugin to generate typescript definitions from thrift files.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guardian/scrooge-extras.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/guardian/scrooge-extras/issues"
+  },
+  "homepage": "https://github.com/guardian/scrooge-extras#readme",
+  "devDependencies": {
+    "typescript": "^4.1.5"
+  }
+}

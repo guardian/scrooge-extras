@@ -10,4 +10,6 @@ struct School {
   6: required map<string,shared.Student> classes
   10: required map<i32,shared.Student> otherMapOfPeople
   11: optional i64 ageInMs
+  12: optional map<string,i32> emptyMap
+  13: optional list<string> emptyList
 }

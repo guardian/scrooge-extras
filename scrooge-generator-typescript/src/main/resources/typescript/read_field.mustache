@@ -15,10 +15,8 @@ if (listInfo{{depth}}.etype === {{nestedType.thriftType}}) {
         {{/nestedType}}
         {{variableName}}.push({{nestedType.variableName}});
     }
-    protocol.{{endReadingStatement}}();
-} else {
-    protocol.skip(ftype);
 }
+protocol.{{endReadingStatement}}();
 {{/isCollection}}
 {{#isMap}}
 const mapInfo{{depth}} = protocol.readMapBegin();
@@ -34,8 +32,6 @@ if (mapInfo{{depth}}.ktype === {{keyType.thriftType}} && mapInfo{{depth}}.vtype 
     {{/valueType}}
     {{variableName}}[{{keyType.variableName}}] = {{valueType.variableName}};
     }
-    protocol.readMapEnd();
-} else {
-    protocol.skip(ftype);
 }
+protocol.readMapEnd();
 {{/isMap}}
