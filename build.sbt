@@ -13,7 +13,40 @@ publish / skip := true
 
 val scroogeVersion = "20.4.1"
 
-val standardReleaseSteps: Seq[ReleaseStep] = Seq(
+lazy val mavenSettings = Seq(
+  pomExtra := (
+    <url>https://github.com/guardian/scrooge-extras</url>
+      <scm>
+        <connection>scm:git:git@github.com:guardian/scrooge-extras.git</connection>
+        <developerConnection>scm:git:git@github.com:guardian/scrooge-extras.git</developerConnection>
+        <url>git@github.com:guardian/scrooge-extras.git</url>
+      </scm>
+      <developers>
+        <developer>
+          <id>alexduf</id>
+          <name>Alex Dufournet</name>
+          <url>https://github.com/alexduf</url>
+        </developer>
+        <developer>
+          <id>JamieB-gu</id>
+          <name>Jamie B</name>
+          <url>https://github.com/JamieB-gu</url>
+        </developer>
+        <developer>
+          <id>JustinPinner</id>
+          <name>Justin Pinner</name>
+          <url>https://github.com/JustinPinner</url>
+        </developer>
+      </developers>
+    ),
+  publishTo := sonatypePublishToBundle.value,
+  publishConfiguration := publishConfiguration.value.withOverwrite(false),
+  publishMavenStyle := true,
+  publishArtifact in Test := false,
+  pomIncludeRepository := { _ => false }
+)
+
+lazy val standardReleaseSteps: Seq[ReleaseStep] = Seq(
   checkSnapshotDependencies,
   inquireVersions,
   runClean,
@@ -22,7 +55,8 @@ val standardReleaseSteps: Seq[ReleaseStep] = Seq(
   commitReleaseVersion,
   tagRelease,
   publishArtifacts,
-  releaseStepTask(bintrayRelease),
+  releaseStepCommandAndRemaining("+publishSigned"),
+  releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
   commitNextVersion,
   pushChanges
@@ -33,8 +67,8 @@ lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
   .settings(
     name := "sbt-scrooge-typescript",
     sbtPlugin := true,
-    bintrayOrganization := Some("guardian"),
-    bintrayRepository := "sbt-plugins",
+    organization := "com.gu",
+    resolvers += Resolver.sonatypeRepo("public"),
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
 
     // this plugin depends on the scrooge plugin
@@ -49,8 +83,8 @@ lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
 lazy val typescript = project.in(file("scrooge-generator-typescript"))
   .settings(
     name := "scrooge-generator-typescript",
-    bintrayOrganization := Some("guardian"),
-    bintrayRepository := "platforms",
+    organization := "com.gu",
+    resolvers += Resolver.sonatypeRepo("public"),
     libraryDependencies ++= Seq(
       "com.twitter" %% "scrooge-generator" % scroogeVersion,
       "com.twitter" %% "scrooge-core" % scroogeVersion % "test",
