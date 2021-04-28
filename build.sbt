@@ -64,6 +64,7 @@ lazy val standardReleaseSteps: Seq[ReleaseStep] = Seq(
 
 lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
   .dependsOn(typescript)
+  .settings(mavenSettings)
   .settings(
     name := "sbt-scrooge-typescript",
     sbtPlugin := true,
@@ -81,6 +82,7 @@ lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
   )
 
 lazy val typescript = project.in(file("scrooge-generator-typescript"))
+  .settings(mavenSettings)
   .settings(
     name := "scrooge-generator-typescript",
     organization := "com.gu",
