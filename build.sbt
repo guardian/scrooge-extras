@@ -58,8 +58,8 @@ lazy val standardReleaseSteps: Seq[ReleaseStep] = Seq(
   releaseStepCommandAndRemaining("+publishSigned"),
   releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
-  commitNextVersion //,
-  // pushChanges    // <-- only to main branch
+  commitNextVersion,
+  pushChanges
 )
 
 lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
