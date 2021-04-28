@@ -150,6 +150,7 @@ You need the following installed and configured:
 _Assuming your project is already set up with scrooge to generate scala files_
 
 In `project/plugins.sbt`
+TODO: figure out instructions if/when it is available from Sonatype
 ```sbt
 addSbtPlugin("com.twitter" % "scrooge-sbt-plugin" % "20.4.1")
 
