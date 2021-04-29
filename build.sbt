@@ -40,7 +40,8 @@ lazy val commonSettings = Seq(
     url = url("https://github.com/guardian")
   )),
   resolvers += Resolver.sonatypeRepo("public"),
-  releaseProcess := standardReleaseSteps
+  releaseProcess := standardReleaseSteps,
+  publishConfiguration := publishConfiguration.value.withOverwrite(true)
 )
 
 lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
