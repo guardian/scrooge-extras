@@ -27,23 +27,27 @@ lazy val standardReleaseSteps: Seq[ReleaseStep] = Seq(
   pushChanges
 )
 
+lazy val commonSettings = Seq(
+  organization := "com.gu",
+  publishTo := sonatypePublishToBundle.value,
+  scmInfo := Some(ScmInfo(
+    url("https://github.com/guardian/scrooge-extras"),
+    "scm:git:git@github.com:guardian/scrooge-extras.git"
+  )),
+  developers := List(Developer(
+    id = "Guardian",
+    name = "Guardian",
+    email = null,
+    url = url("https://github.com/guardian")
+  )),
+  releaseProcess := standardReleaseSteps
+)
 lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
   .dependsOn(typescript)
+  .settings(commonSettings)
   .settings(
     name := "sbt-scrooge-typescript",
     sbtPlugin := true,
-    organization := "com.gu",
-    publishTo := sonatypePublishToBundle.value,
-    scmInfo := Some(ScmInfo(
-      url("https://github.com/guardian/scrooge-extras"),
-      "scm:git:git@github.com:guardian/scrooge-extras.git"
-    )),
-    developers := List(Developer(
-      id = "Guardian",
-      name = "Guardian",
-      email = null,
-      url = url("https://github.com/guardian")
-    )),
     resolvers += Resolver.sonatypeRepo("public"),
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
 
@@ -52,25 +56,13 @@ lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
       "com.twitter" % "scrooge-sbt-plugin" % scroogeVersion,
       (pluginCrossBuild / sbtBinaryVersion).value,
       (update / scalaBinaryVersion).value
-    ),
-    releaseProcess := standardReleaseSteps
+    )
   )
 
 lazy val typescript = project.in(file("scrooge-generator-typescript"))
+  .settings(commonSettings)
   .settings(
     name := "scrooge-generator-typescript",
-    organization := "com.gu",
-    publishTo := sonatypePublishToBundle.value,
-    scmInfo := Some(ScmInfo(
-      url("https://github.com/guardian/scrooge-extras"),
-      "scm:git:git@github.com:guardian/scrooge-extras.git"
-    )),
-    developers := List(Developer(
-      id = "Guardian",
-      name = "Guardian",
-      email = null,
-      url = url("https://github.com/guardian")
-    )),
     resolvers += Resolver.sonatypeRepo("public"),
     libraryDependencies ++= Seq(
       "com.twitter" %% "scrooge-generator" % scroogeVersion,
@@ -85,13 +77,13 @@ lazy val typescript = project.in(file("scrooge-generator-typescript"))
       compiler.language = "scala"
       compiler.run()
       ((Compile / sourceManaged).value / "generated" ** "*.scala").get()
-    },
-    releaseProcess := standardReleaseSteps
+    }
   )
 
 
 lazy val root = Project(id = "root", base = file("."))
   .aggregate(sbtScroogeTypescript, typescript)
+  .settings(commonSettings)
   .settings(
     publishArtifact := false
   )
