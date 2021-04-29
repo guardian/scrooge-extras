@@ -34,6 +34,7 @@ lazy val commonSettings = Seq(
     url("https://github.com/guardian/scrooge-extras"),
     "scm:git:git@github.com:guardian/scrooge-extras.git"
   )),
+  homepage := Some(url("https://github.com/guardian/scrooge-extras")),
   developers := List(Developer(
     id = "Guardian",
     name = "Guardian",
