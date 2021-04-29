@@ -1,6 +1,7 @@
 import sbt.Defaults.sbtPluginExtra
 import sbtrelease.ReleaseStateTransformations._
 import com.twitter.scrooge.Compiler
+import sbt.url
 
 name := "scrooge-extras"
 
@@ -12,46 +13,6 @@ ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICEN
 publish / skip := true
 
 val scroogeVersion = "20.4.1"
-
-lazy val mavenSettings = Seq(
-  pomExtra := (
-    <url>https://github.com/guardian/scrooge-extras</url>
-      <licenses>
-        <license>
-          <name>Apache 2</name>
-          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <distribution>repo</distribution>
-        </license>
-      </licenses>
-      <scm>
-        <connection>scm:git:git@github.com:guardian/scrooge-extras.git</connection>
-        <developerConnection>scm:git:git@github.com:guardian/scrooge-extras.git</developerConnection>
-        <url>git@github.com:guardian/scrooge-extras.git</url>
-      </scm>
-      <developers>
-        <developer>
-          <id>alexduf</id>
-          <name>Alex Dufournet</name>
-          <url>https://github.com/alexduf</url>
-        </developer>
-        <developer>
-          <id>JamieB-gu</id>
-          <name>Jamie B</name>
-          <url>https://github.com/JamieB-gu</url>
-        </developer>
-        <developer>
-          <id>JustinPinner</id>
-          <name>Justin Pinner</name>
-          <url>https://github.com/JustinPinner</url>
-        </developer>
-      </developers>
-    ),
-  publishTo := sonatypePublishToBundle.value,
-  publishConfiguration := publishConfiguration.value.withOverwrite(false),
-  publishMavenStyle := true,
-  publishArtifact in Test := false,
-  pomIncludeRepository := { _ => false }
-)
 
 lazy val standardReleaseSteps: Seq[ReleaseStep] = Seq(
   checkSnapshotDependencies,
@@ -71,11 +32,21 @@ lazy val standardReleaseSteps: Seq[ReleaseStep] = Seq(
 
 lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
   .dependsOn(typescript)
-  .settings(mavenSettings)
   .settings(
     name := "sbt-scrooge-typescript",
     sbtPlugin := true,
     organization := "com.gu",
+    publishTo := sonatypePublishToBundle.value,
+    scmInfo := Some(ScmInfo(
+      url("https://github.com/guardian/scrooge-extras"),
+      "scm:git:git@github.com:guardian/scrooge-extras.git"
+    )),
+    developers := List(Developer(
+      id = "Guardian",
+      name = "Guardian",
+      email = null,
+      url = url("https://github.com/guardian")
+    )),
     resolvers += Resolver.sonatypeRepo("public"),
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
 
@@ -89,10 +60,20 @@ lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
   )
 
 lazy val typescript = project.in(file("scrooge-generator-typescript"))
-  .settings(mavenSettings)
   .settings(
     name := "scrooge-generator-typescript",
     organization := "com.gu",
+    publishTo := sonatypePublishToBundle.value,
+    scmInfo := Some(ScmInfo(
+      url("https://github.com/guardian/scrooge-extras"),
+      "scm:git:git@github.com:guardian/scrooge-extras.git"
+    )),
+    developers := List(Developer(
+      id = "Guardian",
+      name = "Guardian",
+      email = null,
+      url = url("https://github.com/guardian")
+    )),
     resolvers += Resolver.sonatypeRepo("public"),
     libraryDependencies ++= Seq(
       "com.twitter" %% "scrooge-generator" % scroogeVersion,
