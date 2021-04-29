@@ -17,14 +17,11 @@ lazy val standardReleaseSteps: Seq[ReleaseStep] = Seq(
   runClean,
   runTest,
   setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
   publishArtifacts,
   releaseStepCommandAndRemaining("+publishSigned"),
   releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
-  commitNextVersion,
-  pushChanges
+  commitNextVersion
 )
 
 lazy val commonSettings = Seq(
