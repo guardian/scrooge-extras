@@ -31,7 +31,6 @@ lazy val commonSettings = Seq(
     url("https://github.com/guardian/scrooge-extras"),
     "scm:git:git@github.com:guardian/scrooge-extras.git"
   )),
-  licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")),
   homepage := Some(url("https://github.com/guardian/scrooge-extras")),
   developers := List(Developer(
     id = "Guardian",
