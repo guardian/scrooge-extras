@@ -9,9 +9,6 @@ ThisBuild / organization := "com.gu"
 ThisBuild / scalaVersion := "2.12.11"
 ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-// don't publish the root project
-publish / skip := true
-
 val scroogeVersion = "20.4.1"
 
 lazy val standardReleaseSteps: Seq[ReleaseStep] = Seq(
@@ -92,3 +89,9 @@ lazy val typescript = project.in(file("scrooge-generator-typescript"))
     releaseProcess := standardReleaseSteps
   )
 
+
+lazy val root = Project(id = "root", base = file("."))
+  .aggregate(sbtScroogeTypescript, typescript)
+  .settings(
+    publishArtifact := false
+  )
