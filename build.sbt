@@ -16,6 +16,13 @@ val scroogeVersion = "20.4.1"
 lazy val mavenSettings = Seq(
   pomExtra := (
     <url>https://github.com/guardian/scrooge-extras</url>
+      <licenses>
+        <license>
+          <name>Apache 2</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
       <scm>
         <connection>scm:git:git@github.com:guardian/scrooge-extras.git</connection>
         <developerConnection>scm:git:git@github.com:guardian/scrooge-extras.git</developerConnection>
