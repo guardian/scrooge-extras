@@ -1,14 +1,13 @@
 package com.gu.scrooge.backend.typescript
 
 import java.nio.file.{Files, Path, Paths, StandardCopyOption}
-
 import com.gu.thriftTest.school.School
 import com.gu.thriftTest.school.common.Denomination.FullName
 import com.gu.thriftTest.school.common.Type.{Human, Robot}
 import com.gu.thriftTest.school.common.{Denomination, Student}
 
 import sys.process._
-import com.twitter.scrooge.{Compiler, ThriftStruct, ThriftUtil}
+import com.twitter.scrooge.{Compiler, ScroogeConfig, ThriftStruct, ThriftUtil}
 import org.apache.thrift.protocol.{TCompactProtocol, TProtocol}
 import org.apache.thrift.transport.TMemoryBuffer
 import org.scalatest.flatspec.AnyFlatSpec
@@ -63,13 +62,15 @@ class TypescriptGeneratorSpec extends AnyFlatSpec with Matchers {
   }
 
   def generate(npmProject: NpmProject, thriftFiles: Seq[String]): Unit = {
-    val compiler = new Compiler()
-    compiler.destFolder = npmProject.output.toString
-    thriftFiles.foreach(thriftFile => {
-      compiler.thriftFiles += npmProject.resources.resolve(thriftFile).toString
-    })
-    compiler.defaultNamespace = npmProject.packageName
-    compiler.language = "typescript"
+    val scroogeConfig = ScroogeConfig(
+      destFolder = npmProject.output.toString,
+      thriftFiles = thriftFiles.map (thriftFile => {
+        npmProject.resources.resolve(thriftFile).toString
+      }).toList,
+      defaultNamespace = npmProject.packageName,
+      language = "typescript"
+    )
+    val compiler = new Compiler(scroogeConfig)
     compiler.run()
   }
 

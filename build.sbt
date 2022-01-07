@@ -1,6 +1,6 @@
 import sbt.Defaults.sbtPluginExtra
 import sbtrelease.ReleaseStateTransformations.{setReleaseVersion, _}
-import com.twitter.scrooge.Compiler
+import com.twitter.scrooge.{ScroogeConfig, Compiler}
 import sbt.url
 import sbtrelease.{Version, versionFormatError}
 
@@ -10,7 +10,7 @@ ThisBuild / organization := "com.gu"
 ThisBuild / scalaVersion := "2.12.11"
 ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-val scroogeVersion = "20.4.1"
+val scroogeVersion = "21.12.0"
 
 val candidateReleaseType = "candidate"
 val candidateReleaseSuffix = "-RC1"
@@ -123,10 +123,12 @@ lazy val typescript = project.in(file("scrooge-generator-typescript"))
       "org.scalatest" %% "scalatest" % "3.1.1" % "test"
     ),
     Test / sourceGenerators += { () =>
-      val compiler = new Compiler()
-      compiler.destFolder = ((Compile / sourceManaged).value / "generated").getAbsolutePath
-      compiler.thriftFiles ++= ((Test / resourceDirectory).value / "school" ** "*.thrift").get().map(_.getAbsolutePath)
-      compiler.language = "scala"
+      val scroogeConfig = ScroogeConfig(
+        destFolder = ((Compile / sourceManaged).value / "generated").getAbsolutePath,
+        thriftFiles = ((Test / resourceDirectory).value / "school" ** "*.thrift").get().map(_.getAbsolutePath).toList,
+        language = "scala"
+      )
+      val compiler = new Compiler(scroogeConfig)
       compiler.run()
       ((Compile / sourceManaged).value / "generated" ** "*.scala").get()
     }
