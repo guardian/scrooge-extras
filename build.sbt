@@ -10,16 +10,16 @@ ThisBuild / organization := "com.gu"
 ThisBuild / scalaVersion := "2.12.11"
 ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-val scroogeVersion = "21.12.0"
+val scroogeVersion = "22.1.0"   // remember to also update plugins.sbt if this version changes
 
-val candidateReleaseType = "candidate"
-val candidateReleaseSuffix = "-RC1"
+val betaReleaseType = "beta"
+val betaReleaseSuffix = ".beta.0"
 
 lazy val versionSettingsMaybe = {
-  // For a non-prod release, start sbt with e.g. sbt -DRELEASE_TYPE=candidate
+  // For a beta release, start sbt with sbt -DRELEASE_TYPE=beta
   // For a production release, just start sbt without that
   sys.props.get("RELEASE_TYPE").map {
-    case v if v == candidateReleaseType => candidateReleaseSuffix
+    case v if v == betaReleaseType => betaReleaseSuffix
   }.map { suffix =>
     releaseVersion := {
       ver => Version(ver).map(_.withoutQualifier.string).map(_.concat(suffix)).getOrElse(versionFormatError(ver))
@@ -29,7 +29,7 @@ lazy val versionSettingsMaybe = {
 
 lazy val checkReleaseType: ReleaseStep = ReleaseStep({ st: State =>
   val releaseType = sys.props.get("RELEASE_TYPE").map {
-    case v if v == candidateReleaseType => candidateReleaseType.toUpperCase
+    case v if v == betaReleaseType => betaReleaseType.toUpperCase
   }.getOrElse("PRODUCTION")
 
   SimpleReader.readLine(s"This will be a $releaseType release. Continue? (y/n) [N]: ") match {
@@ -62,8 +62,8 @@ lazy val releaseProcessSteps: Seq[ReleaseStep] = {
     pushChanges
   )
 
-  // candidateSteps will take effect if sbt was started with -DRELEASE_TYPE=candidate
-  lazy val candidateSteps: Seq[ReleaseStep] = Seq(
+  // betaSteps will take effect if sbt was started with -DRELEASE_TYPE=beta
+  lazy val betaSteps: Seq[ReleaseStep] = Seq(
     publishArtifacts,
     releaseStepCommandAndRemaining("+publishSigned"),
     releaseStepCommand("sonatypeBundleRelease"),
@@ -72,7 +72,7 @@ lazy val releaseProcessSteps: Seq[ReleaseStep] = {
 
   // detect if a RELEASE_TYPE param was specified when sbt was started, and choose release type based on that
   commonSteps ++ (sys.props.get("RELEASE_TYPE") match {
-    case Some(v) if v == candidateReleaseType => candidateSteps // this is a release candidate build to sonatype and Maven
+    case Some(v) if v == betaReleaseType => betaSteps // this is a beta build to sonatype and Maven
     case _ => prodSteps  // it's a production release
   })
 
