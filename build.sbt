@@ -13,7 +13,7 @@ ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICEN
 val scroogeVersion = "22.1.0"   // remember to also update plugins.sbt if this version changes
 
 val betaReleaseType = "beta"
-val betaReleaseSuffix = ".beta.0"
+val betaReleaseSuffix = "-beta.0"
 
 lazy val versionSettingsMaybe = {
   // For a beta release, start sbt with sbt -DRELEASE_TYPE=beta
