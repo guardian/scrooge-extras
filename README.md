@@ -192,6 +192,7 @@ Here are some settings you may want to use:
  - scroogeTypescriptDevDependencies: The dev dependencies to put in the `package.json`
  - scroogeTypescriptDependencies: The dependencies to put in the `package.json`
  - scroogeTypescriptDryRun: To be able to run everything without publishing to NPM
+ - scroogeTypescriptPublishTag: An optional tag for your NPM release, primarily for beta.
  
  
 ## Using the generated files
