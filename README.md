@@ -192,6 +192,7 @@ Here are some settings you may want to use:
  - scroogeTypescriptDevDependencies: The dev dependencies to put in the `package.json`
  - scroogeTypescriptDependencies: The dependencies to put in the `package.json`
  - scroogeTypescriptDryRun: To be able to run everything without publishing to NPM
+ - scroogeTypescriptPublishTag: An optional tag for your NPM release, primarily for beta.
  
  
 ## Using the generated files
@@ -218,3 +219,23 @@ Any contribution should ensure the tests are running, in the sbt shell:
 ```sbtshell
 test
 ```
+
+## How to release this library
+
+Beta releases from a WIP branch can be deployed Maven. To do this, start sbt with
+
+`sbt -DRELEASE_TYPE=beta`
+
+In beta mode, when you follow the remaining instructions, you'll be prompted to confirm that you intend to put out a
+beta release and if so, the version number should take the form of `x.y.z.beta.n`. While making beta releases you 
+should always update the next version to reflect the beta status of the code when prompted, i.e. don't just let it 
+revert to -SNAPSHOT which it will want to do by default. 
+
+When making a prod release once your changes have been through the PR process and are merged to the main/master branch, 
+checkout the main/master branch and start sbt as normal (without the -DRELEASE_TYPE parameter) and run
+
+```sbtshell
+release cross
+```
+
+Following a successful production release, the version details are automatically committed and pushed back to github.

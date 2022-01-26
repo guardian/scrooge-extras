@@ -29,6 +29,9 @@ object ScroogeTypescriptGen extends AutoPlugin {
     lazy val scroogeTypescriptPackageMapping = settingKey[Map[String, String]]("The mapping between the thrift jar dependency name to the npm module name")
     lazy val scroogeTypescriptNpmPackageName = settingKey[String]("The name of the package in the package.json")
     lazy val scroogeTypescriptDryRun = settingKey[Boolean]("Whether to try all the step without actually publishing the library on NPM")
+
+    // a setting to enable custom tag for the build
+    lazy val scroogeTypescriptPublishTag = settingKey[String]("Any custom tag to identify this release i.e. beta. Defaults to empty string.")
   }
 
   import autoImport._
@@ -57,6 +60,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
     scroogeTypescriptPackageMapping := Map(),
     scroogeTypescriptNpmPackageName := name.value,
     scroogeTypescriptDryRun := false,
+    scroogeTypescriptPublishTag := "",
 
     scroogeTypescriptGenPackageJson := {
       def asHash(map: Map[String, String]): String = map.map {case (k, v) => s""""$k": "$v"""" }.mkString("{\n",",\n","\n}")
@@ -160,15 +164,20 @@ object ScroogeTypescriptGen extends AutoPlugin {
     scroogeTypescriptNPMPublish := {
       scroogeTypescriptCompile.value
 
-      val generatedTypescriptFiles = (scroogeTypescriptPackageDirectory.value ** ("*.ts" -- "*.d.ts")).get()
+      val tag = if (scroogeTypescriptPublishTag.value.nonEmpty) {
+        s" --tag ${scroogeTypescriptPublishTag.value}"
+      } else {
+        ""
+      }
 
+      val generatedTypescriptFiles = (scroogeTypescriptPackageDirectory.value ** ("*.ts" -- "*.d.ts")).get()
       if (scroogeTypescriptDryRun.value) {
-        sLog.value.info("Would have run npm publish --access public but we're in dry-mode")
+        sLog.value.info(s"Would have run npm publish --access public$tag but we're in dry-mode")
         sLog.value.info(s"Would also have deleted these files before publishing: ${generatedTypescriptFiles.map(_.name)}")
       } else {
         generatedTypescriptFiles.foreach(_.delete)
         runCmd(
-          cmd = "npm publish --access public",
+          cmd = "npm publish --access public".concat(tag),
           dir = scroogeTypescriptPackageDirectory.value,
           logger = sLog.value,
           onError = "Unable to publish package to NPM, check the output above"
