@@ -2,6 +2,7 @@ package com.gu.scrooge.backend.typescript
 
 import java.io.Writer
 import java.lang.reflect.{Field, Method}
+import java.util.List
 
 import com.github.mustachejava.Iteration
 import com.github.mustachejava.reflect.ReflectionObjectHandler
@@ -22,9 +23,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
 
   override def coerce(value: AnyRef): Object = {
     value match {
-      case m: scala.collection.Map[_, _] =>
-        // TODO: when we stop supporting scala 2.11, use JavaConverters.mapAsJavaMap
-        m.asJava
+      case m: scala.collection.Map[_, _] => mapAsJavaMap(m)
       case u: BoxedUnit => null
       case Some(some: AnyRef) => coerce(some)
       case None => null
@@ -36,7 +35,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
     iteration: Iteration,
     writer: Writer,
     value: AnyRef,
-    scopes: Array[AnyRef]
+    scopes: List[AnyRef]
   ): Writer = {
     value match {
       case TraversableAnyRef(t) => {
@@ -54,7 +53,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
     iteration: Iteration,
     writer: Writer,
     value: AnyRef,
-    scopes: Array[AnyRef]
+    scopes: List[AnyRef]
   ): Writer = {
     value match {
       case TraversableAnyRef(t) => {
