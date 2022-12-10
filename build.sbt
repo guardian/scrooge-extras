@@ -10,7 +10,7 @@ ThisBuild / organization := "com.gu"
 ThisBuild / scalaVersion := "2.12.11"
 ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-val scroogeVersion = "22.1.0"   // remember to also update plugins.sbt if this version changes
+val scroogeVersion = "22.7.0"   // remember to also update plugins.sbt if this version changes
 
 val betaReleaseType = "beta"
 val betaReleaseSuffix = "-beta.0"
@@ -119,8 +119,8 @@ lazy val typescript = project.in(file("scrooge-generator-typescript"))
     libraryDependencies ++= Seq(
       "com.twitter" %% "scrooge-generator" % scroogeVersion,
       "com.twitter" %% "scrooge-core" % scroogeVersion % "test",
-      "com.github.spullara.mustache.java" % "compiler" % "0.8.18",
-      "org.scalatest" %% "scalatest" % "3.1.1" % "test"
+      "com.github.spullara.mustache.java" % "compiler" % "0.9.10",
+      "org.scalatest" %% "scalatest" % "3.2.14" % "test"
     ),
     Test / sourceGenerators += { () =>
       val scroogeConfig = ScroogeConfig(
