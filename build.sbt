@@ -7,7 +7,7 @@ import sbtrelease.{Version, versionFormatError}
 name := "scrooge-extras"
 
 ThisBuild / organization := "com.gu"
-ThisBuild / scalaVersion := "2.12.11"
+ThisBuild / scalaVersion := "2.12.17"
 ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
 val scroogeVersion = "22.7.0"   // remember to also update plugins.sbt if this version changes
@@ -92,7 +92,7 @@ lazy val commonSettings = Seq(
     email = null,
     url = url("https://github.com/guardian")
   )),
-  resolvers += Resolver.sonatypeRepo("public"),
+  resolvers ++= Resolver.sonatypeOssRepos("public"),
   releaseProcess := releaseProcessSteps
 )
 
