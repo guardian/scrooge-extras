@@ -4,12 +4,12 @@
   "description": "A test package.json",
   "license": "Apache-2.0",
   "devDependencies": {
-    "typescript": "^3.8.3"
+    "typescript": "^4.9.5"
   },
   "dependencies": {
     "@types/node-int64": "^0.4.29",
-    "@types/thrift": "^0.10.9",
+    "@types/thrift": "^0.10.12",
     "node-int64": "^0.4.0",
-    "thrift": "^0.12.0"
+    "thrift": "^0.15.0"
   }
 }

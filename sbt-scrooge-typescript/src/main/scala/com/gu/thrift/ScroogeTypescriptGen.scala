@@ -23,6 +23,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
 
     // the settings to customise the generation process
     lazy val scroogeTypescriptDevDependencies = settingKey[Map[String, String]]("The node devDependencies to include in the package.json")
+    lazy val scroogeTypescriptPeerDependencies = settingKey[Map[String, String]]("The node peerDependencies to include in the package.json")
     lazy val scroogeTypescriptDependencies = settingKey[Map[String, String]]("The node dependencies to include in the package.json")
     lazy val scroogeTypescriptPackageDirectory = settingKey[File]("The directory where the node package will be generated")
     lazy val scroogeTypescriptPackageLicense = settingKey[String]("The license used to publish the package")
@@ -47,6 +48,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
     scroogeTypescriptDevDependencies := NPMLibraries.devDependencies,
+    scroogeTypescriptPeerDependencies := NPMLibraries.peerDependencies,
     scroogeTypescriptDependencies := {
       val dependencies = (Compile / scroogeThriftDependencies).value.flatMap { dependency =>
         for {
@@ -79,7 +81,8 @@ object ScroogeTypescriptGen extends AutoPlugin {
         |  "author": "",
         |  "license": "${scroogeTypescriptPackageLicense.value}",
         |  "devDependencies": ${asHash(scroogeTypescriptDevDependencies.value)},
-        |  "dependencies": ${asHash(scroogeTypescriptDependencies.value)}
+        |  "dependencies": ${asHash(scroogeTypescriptDependencies.value)},
+        |  "peerDependencies": ${asHash(scroogeTypescriptPeerDependencies.value)},
         |}""".stripMargin
       IO.write(packageJson, content)
       packageJson

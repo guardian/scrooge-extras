@@ -190,6 +190,7 @@ Here are some settings you may want to use:
  - scroogeTypescriptPackageLicense: The license of the package on NPM
  - scroogeTypescriptPackageMapping: The mapping between scala libraries and their NPM equivalent
  - scroogeTypescriptDevDependencies: The dev dependencies to put in the `package.json`
+ - scroogeTypescriptPeerDependencies: The peer dependencies to put in the `package.json`
  - scroogeTypescriptDependencies: The dependencies to put in the `package.json`
  - scroogeTypescriptDryRun: To be able to run everything without publishing to NPM
  - scroogeTypescriptPublishTag: An optional tag for your NPM release, primarily for beta.
