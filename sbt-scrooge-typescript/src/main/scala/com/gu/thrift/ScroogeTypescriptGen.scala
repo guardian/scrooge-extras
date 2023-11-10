@@ -36,9 +36,9 @@ object ScroogeTypescriptGen extends AutoPlugin {
 
   import autoImport._
 
-  private def runCmd(cmd: String, dir: File, logger: Logger, expected: Int = 0, onError: String): Int = {
+  private def runCmd(cmd: String, dir: File, logger: Logger, expected: Int = 0, onError: String, envParams: List[(String, String)] = List.empty): Int = {
     logger.info(s"Running ${cmd}")
-    val returnCode = Process(cmd, dir).!
+    val returnCode = Process(cmd, dir, envParams*).!
     if (returnCode != expected) {
       throw new Exception(s"Return code: $returnCode. $onError")
     }
@@ -164,6 +164,10 @@ object ScroogeTypescriptGen extends AutoPlugin {
     scroogeTypescriptNPMPublish := {
       scroogeTypescriptCompile.value
 
+      val tokenEnvParams =
+        getEnvVar("NPM_TOKEN").toList ++
+        getEnvVar("NODE_AUTH_TOKEN").toList
+
       val tag = if (scroogeTypescriptPublishTag.value.nonEmpty) {
         s" --tag ${scroogeTypescriptPublishTag.value}"
       } else {
@@ -180,7 +184,8 @@ object ScroogeTypescriptGen extends AutoPlugin {
           cmd = "npm publish --access public".concat(tag),
           dir = scroogeTypescriptPackageDirectory.value,
           logger = sLog.value,
-          onError = "Unable to publish package to NPM, check the output above"
+          onError = "Unable to publish package to NPM, check the output above",
+          envParams = tokenEnvParams
         )
       }
     },
@@ -201,4 +206,8 @@ object ScroogeTypescriptGen extends AutoPlugin {
       ))
     }
   )
+
+  def getEnvVar(varName: String): Option[(String, String)] = sys.env
+    .get(varName)
+    .map(token => varName -> token)
 }
