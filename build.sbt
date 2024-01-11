@@ -80,6 +80,8 @@ lazy val releaseProcessSteps: Seq[ReleaseStep] = {
 
 lazy val commonSettings = Seq(
   organization := "com.gu",
+  Test / testOptions +=
+    Tests.Argument(TestFrameworks.ScalaTest, "-u", s"test-results/scala-${scalaVersion.value}", "-o"),
   publishTo := sonatypePublishToBundle.value,
   scmInfo := Some(ScmInfo(
     url("https://github.com/guardian/scrooge-extras"),
