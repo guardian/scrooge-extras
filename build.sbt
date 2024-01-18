@@ -65,6 +65,7 @@ lazy val root = Project(id = "root", base = file("."))
   .aggregate(sbtScroogeTypescript, typescript)
   .settings(
     publish / skip := true,
+    releaseVersion := ReleaseVersion.fromAggregatedAssessedCompatibilityWithLatestRelease().value,
     releaseProcess := Seq(
       checkSnapshotDependencies,
       inquireVersions,
