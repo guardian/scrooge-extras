@@ -4,10 +4,10 @@
   "description": "A test package.json",
   "license": "Apache-2.0",
   "devDependencies": {
-    "typescript": "^3.8.3"
+    "typescript": "^4.1.5"
   },
   "dependencies": {
-    "@guardian/external":  "file:../external",
+    "@guardian/external": "file:../external",
     "@types/node-int64": "^0.4.29",
     "@types/thrift": "^0.10.9",
     "node-int64": "^0.4.0",
