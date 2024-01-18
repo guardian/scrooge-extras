@@ -41,7 +41,11 @@ async function decode(buffer: Buffer): Promise<School> {
 async function encode(school: School): Promise<Buffer> {
     return new Promise((resolve, reject) => {
         const outputBufferTransport = new TBufferedTransport(undefined, (buffer, seqId) => {
-            resolve(buffer);
+            if (buffer !== undefined) {
+                resolve(buffer);
+            } else {
+                reject();
+            }
         });
         const outputProtocol = new TCompactProtocol(outputBufferTransport);
         SchoolSerde.write(outputProtocol, school);
