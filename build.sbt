@@ -7,35 +7,23 @@ import sbtversionpolicy.withsbtrelease.ReleaseVersion
 name := "scrooge-extras"
 
 ThisBuild / organization := "com.gu"
-ThisBuild / scalaVersion := "2.12.17"
+ThisBuild / scalaVersion := "2.12.18"
 ThisBuild / licenses := Seq(License.Apache2)
 
 ThisBuild / scalacOptions := Seq("-release:11")
 
 val scroogeVersion = "22.7.0" // remember to also update plugins.sbt if this version changes
 
-lazy val commonSettings = Seq(
+lazy val artifactProductionSettings = Seq(
   organization := "com.gu",
   Test / testOptions +=
     Tests.Argument(TestFrameworks.ScalaTest, "-u", s"test-results/scala-${scalaVersion.value}", "-o"),
-  publishTo := sonatypePublishToBundle.value,
-  scmInfo := Some(ScmInfo(
-    url("https://github.com/guardian/scrooge-extras"),
-    "scm:git:git@github.com:guardian/scrooge-extras.git"
-  )),
-  homepage := Some(url("https://github.com/guardian/scrooge-extras")),
-  developers := List(Developer(
-    id = "Guardian",
-    name = "Guardian",
-    email = null,
-    url = url("https://github.com/guardian")
-  )),
   resolvers ++= Resolver.sonatypeOssRepos("public")
 )
 
 lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
   .dependsOn(typescript)
-  .settings(commonSettings)
+  .settings(artifactProductionSettings)
   .settings(
     name := "sbt-scrooge-typescript",
     sbtPlugin := true,
@@ -49,7 +37,7 @@ lazy val sbtScroogeTypescript = project.in(file("sbt-scrooge-typescript"))
   )
 
 lazy val typescript = project.in(file("scrooge-generator-typescript"))
-  .settings(commonSettings)
+  .settings(artifactProductionSettings)
   .settings(
     name := "scrooge-generator-typescript",
     libraryDependencies ++= Seq(
@@ -75,7 +63,6 @@ lazy val typescript = project.in(file("scrooge-generator-typescript"))
 
 lazy val root = Project(id = "root", base = file("."))
   .aggregate(sbtScroogeTypescript, typescript)
-  .settings(commonSettings)
   .settings(
     publish / skip := true,
     releaseVersion := ReleaseVersion.fromAggregatedAssessedCompatibilityWithLatestRelease().value,
