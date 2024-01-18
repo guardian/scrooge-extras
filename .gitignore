@@ -4,3 +4,8 @@ target
 .bsp
 
 node_modules
+
+.bloop/
+.metals/
+project/
+test-results/
