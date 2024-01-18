@@ -2,7 +2,7 @@
 
 _A SBT plugin to generate typescript definitions from thrift files_
 
-[![scrooge-generator-typescript Scala version support](https://index.scala-lang.org/guardian/scrooge-extras/scrooge-generator-typescript/latest-by-scala-version.svg?platform=jvm)](https://index.scala-lang.org/guardian/scrooge-extras/scrooge-generator-typescript)
+[![sbt-scrooge-typescript Scala version support](https://index.scala-lang.org/guardian/scrooge-extras/sbt-scrooge-typescript/latest-by-scala-version.svg?platform=sbt)](https://index.scala-lang.org/guardian/scrooge-extras/sbt-scrooge-typescript)
 
 This plugin leverages Twitter's Scrooge plugin to resolve thrift dependencies.
 
