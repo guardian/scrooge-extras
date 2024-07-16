@@ -24,6 +24,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
     // the settings to customise the generation process
     lazy val scroogeTypescriptDevDependencies = settingKey[Map[String, String]]("The node devDependencies to include in the package.json")
     lazy val scroogeTypescriptDependencies = settingKey[Map[String, String]]("The node dependencies to include in the package.json")
+    lazy val scroogeTypescriptDependencyOverrides = settingKey[Map[String, String]]("Any node dependencies that should override transitive dependencies in the package.json")
     lazy val scroogeTypescriptPackageDirectory = settingKey[File]("The directory where the node package will be generated")
     lazy val scroogeTypescriptPackageLicense = settingKey[String]("The license used to publish the package")
     lazy val scroogeTypescriptPackageMapping = settingKey[Map[String, String]]("The mapping between the thrift jar dependency name to the npm module name")
@@ -56,6 +57,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
       }.toMap
       NPMLibraries.dependencies ++ dependencies
     },
+    scroogeTypescriptDependencyOverrides := NPMLibraries.overrides,
     scroogeTypescriptPackageDirectory := (Compile / scroogeThriftOutputFolder).value / scroogeTypescriptNpmPackageName.value,
     scroogeTypescriptPackageMapping := Map(),
     scroogeTypescriptNpmPackageName := name.value,
@@ -79,7 +81,8 @@ object ScroogeTypescriptGen extends AutoPlugin {
         |  "author": "",
         |  "license": "${scroogeTypescriptPackageLicense.value}",
         |  "devDependencies": ${asHash(scroogeTypescriptDevDependencies.value)},
-        |  "dependencies": ${asHash(scroogeTypescriptDependencies.value)}
+        |  "dependencies": ${asHash(scroogeTypescriptDependencies.value)},
+        |  "overrides": ${asHash(scroogeTypescriptDependencyOverrides.value)}
         |}""".stripMargin
       IO.write(packageJson, content)
       packageJson

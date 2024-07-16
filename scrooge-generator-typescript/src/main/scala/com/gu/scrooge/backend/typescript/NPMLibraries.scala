@@ -9,4 +9,6 @@ object NPMLibraries {
   )
 
   val devDependencies = Map("typescript" -> "^4.5.4")
+
+  val overrides = Map("ws" -> "^5.2.4") // Fixes a high security vulnerability in 5.2.3 (https://github.com/websockets/ws/commit/4abd8f6de4b0b65ef80b3ff081989479ed93377e)
 }
