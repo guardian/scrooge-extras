@@ -12,7 +12,7 @@ ThisBuild / licenses := Seq(License.Apache2)
 
 ThisBuild / scalacOptions := Seq("-release:11")
 
-val scroogeVersion = "22.7.0" // remember to also update plugins.sbt if this version changes
+val scroogeVersion = "22.1.0" // remember to also update plugins.sbt if this version changes
 
 lazy val artifactProductionSettings = Seq(
   organization := "com.gu",
