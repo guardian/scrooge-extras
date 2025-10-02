@@ -8,5 +8,5 @@ object NPMLibraries {
     "thrift" -> "^0.15.0"
   )
 
-  val devDependencies = Map("typescript" -> "^4.5.4")
+  val devDependencies = Map("typescript" -> "5.9.3")
 }
