@@ -43,7 +43,7 @@ lazy val typescript = project.in(file("scrooge-generator-typescript"))
     libraryDependencies ++= Seq(
       "com.twitter" %% "scrooge-generator" % scroogeVersion,
       "com.twitter" %% "scrooge-core" % scroogeVersion % "test",
-      "com.github.spullara.mustache.java" % "compiler" % "0.9.10",
+      "com.github.spullara.mustache.java" % "compiler" % "0.9.14",
       "org.scalatest" %% "scalatest" % "3.2.14" % "test",
       //Update vulnerable dependencies
       "org.codehaus.plexus" % "plexus-utils" % "3.5.0",
