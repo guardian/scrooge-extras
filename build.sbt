@@ -44,7 +44,7 @@ lazy val typescript = project.in(file("scrooge-generator-typescript"))
       "com.twitter" %% "scrooge-generator" % scroogeVersion,
       "com.twitter" %% "scrooge-core" % scroogeVersion % "test",
       "com.github.spullara.mustache.java" % "compiler" % "0.9.10",
-      "org.scalatest" %% "scalatest" % "3.2.14" % "test",
+      "org.scalatest" %% "scalatest" % "3.2.19" % "test",
       //Update vulnerable dependencies
       "org.codehaus.plexus" % "plexus-utils" % "3.5.0",
       "org.apache.thrift" % "libthrift" % "0.17.0"
