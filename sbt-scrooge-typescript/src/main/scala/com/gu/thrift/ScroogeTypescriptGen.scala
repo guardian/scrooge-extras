@@ -90,7 +90,7 @@ object ScroogeTypescriptGen extends AutoPlugin {
         """
           |{
           |  "compilerOptions": {
-          |    "target": "es5",
+          |    "target": "es6",
           |    "module": "commonjs",
           |    "strict": true,
           |    "esModuleInterop": true,
