@@ -149,6 +149,8 @@ object ScroogeTypescriptGen extends AutoPlugin {
 
       runCmd("npm install", packageDir, logger = logger, onError = "Unable to install npm dependencies")
 
+      runCmd("npx tsc -v", packageDir, logger = logger, onError = "Unable to print the TypeScript version, check if tsc is correctly installed")
+
       runCmd("npx tsc", packageDir, logger = logger, onError = "There are compilation errors, check the output above")
 
       val compiledFiles = (packageDir ** "*.js").get()
