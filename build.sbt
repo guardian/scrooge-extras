@@ -7,12 +7,12 @@ import sbtversionpolicy.withsbtrelease.ReleaseVersion
 name := "scrooge-extras"
 
 ThisBuild / organization := "com.gu"
-ThisBuild / scalaVersion := "2.12.18"
+ThisBuild / scalaVersion := "2.12.20"
 ThisBuild / licenses := Seq(License.Apache2)
 
 ThisBuild / scalacOptions := Seq("-release:11")
 
-val scroogeVersion = "22.1.0" // remember to also update plugins.sbt if this version changes
+val scroogeVersion = "22.12.0" // remember to also update plugins.sbt if this version changes
 
 lazy val artifactProductionSettings = Seq(
   organization := "com.gu",
@@ -43,11 +43,11 @@ lazy val typescript = project.in(file("scrooge-generator-typescript"))
     libraryDependencies ++= Seq(
       "com.twitter" %% "scrooge-generator" % scroogeVersion,
       "com.twitter" %% "scrooge-core" % scroogeVersion % "test",
-      "com.github.spullara.mustache.java" % "compiler" % "0.9.10",
-      "org.scalatest" %% "scalatest" % "3.2.14" % "test",
+      "com.github.spullara.mustache.java" % "compiler" % "0.9.14",
+      "org.scalatest" %% "scalatest" % "3.2.19" % "test",
       //Update vulnerable dependencies
-      "org.codehaus.plexus" % "plexus-utils" % "3.5.0",
-      "org.apache.thrift" % "libthrift" % "0.17.0"
+      "org.codehaus.plexus" % "plexus-utils" % "3.5.1",
+      "org.apache.thrift" % "libthrift" % "0.22.0"
     ),
     Test / sourceGenerators += { () =>
       val scroogeConfig = ScroogeConfig(
