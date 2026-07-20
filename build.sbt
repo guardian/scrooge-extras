@@ -7,7 +7,7 @@ import sbtversionpolicy.withsbtrelease.ReleaseVersion
 name := "scrooge-extras"
 
 ThisBuild / organization := "com.gu"
-ThisBuild / scalaVersion := "2.12.18"
+ThisBuild / scalaVersion := "2.12.21"
 ThisBuild / licenses := Seq(License.Apache2)
 
 ThisBuild / scalacOptions := Seq("-release:11")
